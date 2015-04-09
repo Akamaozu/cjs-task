@@ -78,9 +78,7 @@ function TaskManager(callback){
 
 		api.get = function(key){
 
-			if(typeof store[key] === 'undefined'){ throw new Error('NO DATA STORED UNDER KEY ' + key); }
-			
-			return store[key];
+			return (typeof store[key] !== 'undefined' ? store[key] : null);
 		}
 
 		api.log = function(entry){
