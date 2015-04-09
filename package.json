@@ -6,7 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/Akamaozu/cjs-task.git"
+  },
+  "author": {
+    "name": "akamaozu",
+    "email": "uzo@designbymobius.ca",
+    "url": "designbymobi.us"
+  },
   "license": "ISC",
   "dependencies": {
     "cjs-noticeboard": "0.0.4"
