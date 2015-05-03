@@ -68,6 +68,12 @@ function TaskManager(callback){
 			api = null;
 		}
 
+		api.unset = function(key){
+
+			if(typeof key === 'undefined'){ return; }
+
+			delete store[key];
+		}
 
 		api.set = function(key, value){
 
