@@ -5,6 +5,7 @@
 
 **What your Javascript Probably Looks Like**
 
+```js
     // CREATE NEW USER
     if(!username || !password || !email){
       callback(error);
@@ -33,10 +34,11 @@
         });
       });      
     });
+```
 
 **What Your Javascript Looks Like with CJS-Task**
 
-    
+```js    
     if(!username || !password || !email){
       callback(error);
     }
@@ -89,7 +91,8 @@
 	  task.end(null, task.get('user-id'));
 	});
 
-	task.start(); 
+	task.start();
+``` 
 
 **Why is the CJS-Task Snippet Preferrable?**
 
