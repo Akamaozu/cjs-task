@@ -3,96 +3,65 @@
 
 ## Simplify Your Javascript with CJS-Task ##
 
-**What your Javascript Probably Looks Like**
+**Without CJS-Task**
 
 ```js
-    // CREATE NEW USER
-    if(!username || !password || !email){
-      callback(error);
-    }
-    
-    check_db_if_username_exists(username, function(err, username_exists){    
-      
-      if(err || username_exists){ return callback(err); }
-        
-      check_db_if_email_exists(email, function(err, email_exists){    
-      
-        if(err || email_exists){ return callback(err); }
-        
-        bcrypt(password, salt, function(err, password_hash){    
-    
-          if(err){ return callback(err); }
-    
-          var create_user_querystring = "'INSERT INTO `user` (username, email, passhash) VALUES ("' + username +'", "' + email +'", "'+ password_hash +'")'";
-    
-          mysql.query( create_user_querystring, function(err, result){
+	// Render Data from API
+	
+	get_data_from_api('http://sour.ce/api/data', function(err, data){	  
+	  if(err){ return callback(err); }
+	  
+	  var modified_data = do_something_synchronous( data );
 
-            if(err || !result){ return callback(err); }
-            
-            callback(null, { user_id: result.insertId });    
-          });
-        });
-      });      
-    });
+	  async_process( modified_data, function(err, formatted_data){
+	    if(err){ return callback(err); }
+
+	    render_data( formatted_data, function(){
+	      console.log('rendered formatted data from api');
+	      callback(null, formatted_data);
+	    });
+	  });
+	});
 ```
 
-**What Your Javascript Looks Like with CJS-Task**
+**With CJS-Task**
 
-```js    
-    if(!username || !password || !email){
-      callback(error);
-    }
+```js
+	// Render Data from API
 
-	var task = require('cjs-task')(function(error, user_id){
-      if(error){ return callback(error); }
-	  callback(null, { user_id: user_id });
+	var task = require('cjs-task')(function(err, formatted_data){
+	  if(err){ return callback(err) }
+
+	  console.log('rendered formatted data from api');
+	  callback(null, formatted_data);
 	});
-    
-	task.set('username', username);
-    task.set('password', password);
-    task.set('email', email);
 
-	task.step('verify unique username', function(){
+	task.step('get data from api', function(){	  
+	  get_data_from_api('http://sour.ce/api/data', function(err, data){
+		if(err){ return task.end(err); }
 
-	  check_db_if_username_exists( task.get('username'), function(err, username_exists){		
-		if(err || username_exists){ return task.end(err); }
+ 		task.set('modified-data', do_something_synchronous( data ));
 	    task.next();
 	  });
 	});
 
-	task.step('verify unique email', function(){
+	task.step('process modified data asynchronously', function(){
+	  async_process( task.get('modified-data'), function(err, formatted_data){
+	    if(err){ return task.end(err); }
 
-	  check_db_if_email_exists( task.get('email'), function(err, email_exists){		
-		if(err || email_exists){ return task.end(err); }
+	    task.set('formatted-data', formatted_data);
 	    task.next();
 	  });
 	});
 
-	task.step('salt and hash password', function(){	
-	
-	  bcrypt( task.get('password'), salt, function(err, password_hash){		
-		if(err || !password_hash){ return task.end(err); }	    
-	    task.set('passhash', password_hash);
-	    task.next();
+	task.step('render formatted data', function(){
+	  render_data( task.get('formatted-data'), function(){
+	    task.end(null, task.get('formatted-data'));
 	  });
-	});
-
-	task.step('create db record', function(){	
-	  var create_user_querystring = "'INSERT INTO `user` (username, email, passhash) VALUES ("' + task.get('username') +'", "' + task.get('email') +'", "'+ task.get('passhash') +'")'";
-    
-      mysql.query( create_user_querystring, function(err, result){
-        if(err || !result){ return task.end(err); }
-	    task.set('user-id', result.insertId);            
-        task.next();    
-      });
-	});
-
-	task.step('confirm user creation', function(){
-	  task.end(null, task.get('user-id'));
 	});
 
 	task.start();
-``` 
+```	
 
 **Why is the CJS-Task Snippet Preferrable?**
 
