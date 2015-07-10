@@ -1,7 +1,7 @@
 {
   "name": "cjs-task",
-  "version": "0.0.6",
-  "description": "Break Complex Tasks down to Simple Readable Steps",
+  "version": "0.0.7",
+  "description": "Control Flow Like a Pro",
   "main": "cjs-task.js",
   "scripts": {
     "test": "mocha"
@@ -10,12 +10,21 @@
     "type": "git",
     "url": "http://github.com/Akamaozu/cjs-task.git"
   },
+  "keywords": [
+    "control",
+    "flow",
+    "browser",
+    "browserify",
+    "commonjs",
+    "npm",
+    "javascript"
+  ]
   "author": {
     "name": "akamaozu",
     "email": "uzo@designbymobius.ca",
-    "url": "designbymobi.us"
+    "url": "http://designbymobi.us"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "cjs-noticeboard": "0.0.4"
   },

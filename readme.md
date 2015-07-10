@@ -1,74 +1,19 @@
 # CJS-TASK #
 ---
 
-## Simplify Your Javascript with CJS-Task ##
+## Control Flow Like a Pro ##
 
-**Without CJS-Task**
+### Procedural. Callbacks. Promises. Generators. ###
+### No longer matters which one any library uses. ###
 
-```js
-	// Render Data from API
-	
-	get_data_from_api('http://sour.ce/api/data', function(err, data){	  
-	  if(err){ return callback(err); }
-	  
-	  var modified_data = do_something_synchronous( data );
+1. Create a Step to use the library. 
+2. Use Library.
+3. Set data to the Task Instance. 
+4. Go to next step. 
 
-	  async_process( modified_data, function(err, formatted_data){
-	    if(err){ return callback(err); }
+**It's that simple.** 
 
-	    render_data( formatted_data, function(){
-	      console.log('rendered formatted data from api');
-	      callback(null, formatted_data);
-	    });
-	  });
-	});
-```
-
-**With CJS-Task**
-
-```js
-	// Render Data from API
-
-	var task = require('cjs-task')(function(err, formatted_data){
-	  if(err){ return callback(err) }
-
-	  console.log('rendered formatted data from api');
-	  callback(null, formatted_data);
-	});
-
-	task.step('get data from api', function(){	  
-	  get_data_from_api('http://sour.ce/api/data', function(err, data){
-		if(err){ return task.end(err); }
-
- 		task.set('modified-data', do_something_synchronous( data ));
-	    task.next();
-	  });
-	});
-
-	task.step('process modified data asynchronously', function(){
-	  async_process( task.get('modified-data'), function(err, formatted_data){
-	    if(err){ return task.end(err); }
-
-	    task.set('formatted-data', formatted_data);
-	    task.next();
-	  });
-	});
-
-	task.step('render formatted data', function(){
-	  render_data( task.get('formatted-data'), function(){
-	    task.end(null, task.get('formatted-data'));
-	  });
-	});
-
-	task.start();
-```	
-
-**Why is the CJS-Task Snippet Preferrable?**
-
-1. Easier to understand your intent
-2. Easier to add / modify the process
-3. Easier to make different  libraries interoperable
-4. Mix procedural code, callbacks, promises and generators effortlessly
+![Complex Workflows Simplified](http://designbymobi.us/wp-content/uploads/2015/07/sample-task.png)
 
 ## Installation ##
 	npm install --save cjs-task
@@ -121,6 +66,15 @@ Passes its arguments to task callback and executes it.
 * **Notes**
 	* `task.end` will drop all steps and stored data after task callback is executed
 
+### task.callback( callback ) ###
+Overwrite previous task callback. 
+
+* **Is a Function**
+* **Parameters**
+	* **callback**
+		* is a function
+		* is required
+
 ### task.set( key, value ) ###
 Put anything into task instance's key-value store. 
 
@@ -151,3 +105,27 @@ Remove data from task instance's key-value store.
 	* **key**
 		* is a string
 		* is required
+
+## LICENSE ##
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Uzo Olisemeka <uzo@designbymobius.ca>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
