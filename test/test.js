@@ -259,3 +259,190 @@ describe('Task Instance API', function(){
 		});
 	});
 });
+
+describe('Task Instance Behavior', function(){
+
+	describe('task.start', function(){
+
+		it('executes the first step', function(done){
+
+			var started = false;
+			var task = cjs_task();
+
+			task.step('step 1', function(){
+
+				started = true;
+			});
+
+			task.start();
+
+			setTimeout(function(){
+
+				done();
+
+				assert.equal(started === true, true, 'first step did not execute');
+
+			}, 50);
+		});
+	})
+
+	describe('task.step', function(){
+
+		it('adds a process to be executed when task starts', function(done){
+
+			var step_added = false;
+			var task = cjs_task();
+
+			task.step('pass done to task callback', function(){
+
+				step_added = true;
+
+				done();
+
+				assert.equal(step_added === true, true, 'step was not added');
+			});
+
+			task.start();
+		});
+
+		it('executes next step on task.next()', function(done){
+
+			var progressed_to_next_step = false;
+			var task = cjs_task();
+
+			task.step('step 1', task.next);
+
+			task.step('step 2', function(){
+
+				progressed_to_next_step = true;
+
+				done();
+
+				assert.equal(progressed_to_next_step === true, true, 'did not progress to the next step');
+			});
+
+			task.start();
+		});
+
+		it('does not execute next step without task.next()', function(done){
+
+			var steps_executed = {1: false, 2: false};
+			var task = cjs_task();
+
+			task.step('step 1', function(){
+
+				steps_executed[1] = true;
+			});
+
+			task.step('step 2', function(){
+
+				steps_executed[2] = true;
+			});
+
+			task.start();
+
+			setTimeout(function(){
+
+				done();
+
+				assert.equal(steps_executed[1] === true, true, 'step 1 was not executed');
+				assert.equal(steps_executed[2] === false, true, 'step 2 was executed without task.next()');
+			}, 50);
+		});
+
+		it('executes steps sequentially', function(done){
+
+			var expected = ['test', 'is', 'running'];
+			var outcome = [];
+			var task = cjs_task();
+
+			task.step('step 1', function(){
+
+				outcome.push( expected[0] );
+				task.next();
+			});
+
+			task.step('step 2', function(){
+
+				outcome.push( expected[1] );
+				task.next();
+			});
+
+			task.step('step 3', function(){
+
+				outcome.push( expected[2] );
+			});
+
+			task.start();
+
+			setTimeout(function(){
+
+				done();
+
+				assert.equal(expected[0] === outcome[0] && expected[1] === outcome[1] && expected[2] === outcome[2], true, 'steps were not executed sequentially');
+			}, 50);
+		});
+	});
+
+	describe('task.end', function(){
+
+		it('triggers instance callback', function(done){
+
+			var callback_triggered = false;
+
+			var task = cjs_task(function(){
+
+				callback_triggered = true;
+
+				done();
+
+				assert.equal(callback_triggered === true, true, 'callback was not triggered');
+			});
+
+			task.step('step 1', function(){
+
+				task.end();
+			});
+
+			task.start();
+		});
+	});
+
+	describe('task.get', function(){
+
+		it('retrieves value assigned to a key by task.set', function(){
+
+			var set_value = 'hello world';
+			var get_value;
+			var key = 'testing';
+
+			var task = cjs_task();
+
+			task.set( key , set_value);
+
+			get_value = task.get( key );
+
+			assert.equal(set_value === get_value, true, 'retrieved value does not match set value');
+		});
+	});
+
+	describe('task.unset', function(){
+
+		it('deletes value assigned to a key by task.set', function(){
+
+			var set_value = 'hello world';
+			var get_value;
+			var key = 'testing';
+
+			var task = cjs_task();
+
+			task.set( key , set_value);
+
+			task.unset( key );
+
+			get_value = task.get( key );
+
+			assert.equal(get_value === null, true, 'set value was not deleted');
+		});
+	});
+});
