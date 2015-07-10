@@ -1,6 +1,6 @@
 var assert = require('assert');
 var cjs_task = require('../cjs-task.js');
-var expected_api = ['step', 'order', 'start', 'next', 'end', 'unset', 'set', 'get', 'log'];
+var expected_api = ['step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log'];
 var matches_expected_api = false;
 
 describe('require("cjs-task")', function(){
@@ -122,14 +122,6 @@ describe('Task Instance API', function(){
 		it('is a function', function(){
 
 			assert.equal(typeof task.end === 'function', true, 'task.end is not a function');
-		});
-	});
-
-	describe('task.order', function(){
-
-		it('is a function', function(){
-
-			assert.equal(typeof task.order === 'function', true, 'task.order is not a function');
 		});
 	});
 

@@ -35,16 +35,6 @@ function TaskManager(callback){
       register_order.push( name );
     }
 
-    api.order = function(task_list){
-
-      if(Object.prototype.toString.call(task_list) !== '[object Array]'){ 
-
-        throw new Error('GIVEN TASK ORDER IS NOT AN ARRAY'); 
-      }
-
-      task_order = task_list;
-    }
-
     api.start = function(){
 
       if(!task_order){ task_order = register_order; }
