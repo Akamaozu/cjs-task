@@ -28,6 +28,7 @@ function TaskManager(callback){
     api.step = function(name, step){
 
       if(!name){ throw new Error('TASKS CAN\'T HAVE UNNAMED STEPS'); }
+      if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
       if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
 
       task.once(name, 'task-manager', step);
@@ -71,7 +72,8 @@ function TaskManager(callback){
 
     api.unset = function(key){
 
-      if(typeof key === 'undefined'){ return; }
+      if(!key){ throw new Error('NEED A KEY TO DELETE DATA'); }
+      if(typeof key !== 'string'){ throw new Error('KEY MUST BE A STRING'); }
 
       delete store[key];
     }
@@ -79,11 +81,17 @@ function TaskManager(callback){
     api.set = function(key, value){
 
       if(!key){ throw new Error('NEED A KEY TO STORE DATA'); }
+      if(typeof value === 'undefined'){ throw new Error('NEED A VALUE TO STORE'); }
+      if(typeof key !== 'string'){ throw new Error('KEY MUST BE A STRING'); }
+
 
       store[key] = value;
     }
 
     api.get = function(key){
+
+      if(!key){ throw new Error('NEED A KEY TO RETRIEVE DATA'); }
+      if(typeof key !== 'string'){ throw new Error('KEY MUST BE A STRING'); }
 
       return (typeof store[key] !== 'undefined' ? store[key] : null);
     }
