@@ -25,6 +25,14 @@ function TaskManager(callback){
     if(typeof callback !== 'function'){ throw new Error('TASK CALLBACK MUST BE A FUNCTION'); }
 
   // DEFINE API
+    api.callback = function(end_callback){
+
+      if(!end_callback) return;
+      if(typeof end_callback !== 'function'){ throw new Error('TASK CALLBACK MUST BE A FUNCTION'); }
+
+      callback = end_callback;
+    }
+
     api.step = function(name, step){
 
       if(!name){ throw new Error('TASKS CAN\'T HAVE UNNAMED STEPS'); }

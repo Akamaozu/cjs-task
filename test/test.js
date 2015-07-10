@@ -1,6 +1,6 @@
 var assert = require('assert');
 var cjs_task = require('../cjs-task.js');
-var expected_api = ['step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log'];
+var expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log'];
 var matches_expected_api = false;
 
 describe('require("cjs-task")', function(){
@@ -40,7 +40,32 @@ describe('require("cjs-task")', function(){
 
 describe('Task Instance API', function(){
 
+
 	var task = cjs_task();
+
+	describe('task.callback', function(){
+
+		it('is a function', function(){
+
+			assert.equal(typeof task.callback === 'function', true, 'task.callback is not a function');
+		});
+		it('requires a function as first argument', function(){
+
+			var requires_function = false;
+
+			try{
+
+				task.callback([]);
+			}
+
+			catch(err){
+
+				requires_function = true;
+			}
+		
+			assert.equal(requires_function, true, 'first argument does not need to be a function');
+		});
+	});
 
 	describe('task.step', function(){
 
@@ -81,7 +106,7 @@ describe('Task Instance API', function(){
 			}
 		
 			assert.equal(requires_string, true, 'first argument does not need to be a string');
-		})
+		});
 
 		it('requires a function as second argument', function(){
 
@@ -276,7 +301,7 @@ describe('Task Instance Behavior', function(){
 
 			}, 50);
 		});
-	})
+	});
 
 	describe('task.step', function(){
 
@@ -397,6 +422,28 @@ describe('Task Instance Behavior', function(){
 			});
 
 			task.start();
+		});
+	});
+
+	describe('task.callback', function(){
+	
+		it('should overwrite previous task callback', function(){
+
+			var default_callback = false;
+			var modified_callback = false;
+
+			var task = cjs_task(function(){
+				default_callback = true;
+			});
+
+			task.callback(function(){
+				modified_callback = true;
+			});
+
+			task.end();
+
+			assert(default_callback === false, true, 'default callback was triggered');
+			assert(modified_callback === true, true, 'modified callback was not triggered');
 		});
 	});
 
