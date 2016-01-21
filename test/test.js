@@ -267,7 +267,7 @@ describe('Task Instance API', function(){
 				task.unset({});
 			}
 
-			catch(err){
+			catch(error){
 
 				requires_string = true;
 			}
@@ -301,16 +301,41 @@ describe('Task Instance Behavior', function(){
 
 			}, 50);
 		});
+
+		it('throws an error if called multiple times', function(done){
+
+			var task = cjs_task(),
+					error_thrown = false;
+
+			task.step('test multiple starts', function(){
+
+				try{
+
+					task.start();
+				}
+
+				catch(error){
+
+					error_thrown = true;
+				}
+
+				done();
+				
+				assert.equal(error_thrown === true, true, 'error was not thrown when start was called multiple times');
+			});
+
+			task.start();
+		});
 	});
 
 	describe('task.step', function(){
 
-		it('adds a process to be executed when task starts', function(done){
+		it('function executes when task.start() is called', function(done){
 
 			var step_added = false;
 			var task = cjs_task();
 
-			task.step('pass done to task callback', function(){
+			task.step('testing add a step', function(){
 
 				step_added = true;
 
@@ -322,26 +347,7 @@ describe('Task Instance Behavior', function(){
 			task.start();
 		});
 
-		it('executes next step on task.next()', function(done){
-
-			var progressed_to_next_step = false;
-			var task = cjs_task();
-
-			task.step('step 1', task.next);
-
-			task.step('step 2', function(){
-
-				progressed_to_next_step = true;
-
-				done();
-
-				assert.equal(progressed_to_next_step === true, true, 'did not progress to the next step');
-			});
-
-			task.start();
-		});
-
-		it('does not execute next step without task.next()', function(done){
+		it('extra steps do not execute without task.next()', function(done){
 
 			var steps_executed = {1: false, 2: false};
 			var task = cjs_task();
@@ -365,6 +371,28 @@ describe('Task Instance Behavior', function(){
 				assert.equal(steps_executed[1] === true, true, 'step 1 was not executed');
 				assert.equal(steps_executed[2] === false, true, 'step 2 was executed without task.next()');
 			}, 50);
+		});
+	});
+
+	describe('task.next', function(){
+
+		it('executes next step after task has started', function(done){
+
+			var progressed_to_next_step = false;
+			var task = cjs_task();
+
+			task.step('step 1', task.next);
+
+			task.step('step 2', function(){
+
+				progressed_to_next_step = true;
+
+				done();
+
+				assert.equal(progressed_to_next_step === true, true, 'did not progress to the next step');
+			});
+
+			task.start();
 		});
 
 		it('executes steps sequentially', function(done){
@@ -399,6 +427,24 @@ describe('Task Instance Behavior', function(){
 				assert.equal(expected[0] === outcome[0] && expected[1] === outcome[1] && expected[2] === outcome[2], true, 'steps were not executed sequentially');
 			}, 50);
 		});
+
+		it('executes task callback if there are no more steps', function(done){
+
+			var triggered_callback = false;
+			var task = cjs_task( function(){
+
+				triggered_callback = true;
+
+				done();
+
+				assert.equal(triggered_callback === true, true, 'did not trigger callback after last step');
+			});
+
+			task.step('step 1', task.next);
+			task.step('step 2', task.next);
+
+			task.start();
+		});
 	});
 
 	describe('task.end', function(){
@@ -427,7 +473,7 @@ describe('Task Instance Behavior', function(){
 
 	describe('task.callback', function(){
 	
-		it('should overwrite previous task callback', function(){
+		it('overwrites previous task callback', function(){
 
 			var default_callback = false;
 			var modified_callback = false;
@@ -447,6 +493,66 @@ describe('Task Instance Behavior', function(){
 		});
 	});
 
+	describe('task.set', function(){
+
+		it('throws an error if no key is given', function(){
+
+			var task = cjs_task(),
+					value = 'test',
+					error_thrown = false;
+
+			try{
+
+				task.set( null, value );
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
+		});
+
+		it('throws an error if key is not a string', function(){
+
+			var task = cjs_task(),
+					value = 'test',
+					error_thrown = false;
+
+			try{
+
+				task.set( [], value );
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
+		});
+
+		it('throws an error if called with no value to store', function(){
+
+			var task = cjs_task(),
+					key = 'test',
+					error_thrown = false;
+
+			try{
+
+				task.set( key );
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when given no value to store');
+		});
+	});
+
 	describe('task.get', function(){
 
 		it('retrieves value assigned to a key by task.set', function(){
@@ -462,6 +568,47 @@ describe('Task Instance Behavior', function(){
 			get_value = task.get( key );
 
 			assert.equal(set_value === get_value, true, 'retrieved value does not match set value');
+		});
+
+		it('throws an error if no key is given', function(){
+
+			var task = cjs_task(),
+					error_thrown = false;
+
+			task.set('key', 'value');
+
+			try{
+
+				task.get();
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
+		});
+
+		it('throws an error if key is not a string', function(){
+
+			var task = cjs_task(),
+					key = 'test',
+					error_thrown = false;
+
+			task.set( key, 'hello' );
+
+			try{
+
+				task.get( [] );
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
 		});
 	});
 
@@ -482,6 +629,47 @@ describe('Task Instance Behavior', function(){
 			get_value = task.get( key );
 
 			assert.equal(get_value === null, true, 'set value was not deleted');
+		});
+
+		it('throws an error if no key is given', function(){
+
+			var task = cjs_task(),
+					error_thrown = false;
+
+			task.set('key', 'value');
+
+			try{
+
+				task.unset();
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
+		});
+
+		it('throws an error if key is not a string', function(){
+
+			var task = cjs_task(),
+					key = 'test',
+					error_thrown = false;
+
+			task.set( key, 'hello' );
+
+			try{
+
+				task.unset( [] );
+			}
+
+			catch(error){
+
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
 		});
 	});
 });

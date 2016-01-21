@@ -10,6 +10,7 @@ function TaskManager(callback){
     register_order,
     current_step,
     task_order,
+    started,
     store,
     log,
     api;
@@ -45,17 +46,27 @@ function TaskManager(callback){
 
     api.start = function(){
 
-      if(!task_order){ task_order = register_order; }
+      if( started ) throw new Error('TASK HAS ALREADY STARTED');
+
+      started = true;
+      
+      if( !task_order ){ task_order = register_order; }
 
       task.notify( task_order[current_step] );
     }
 
     api.next = function(){
 
-      if( current_step >= (task_order.length - 1) ){ return; }
+      if( current_step < (task_order.length - 1) ){ 
 
           current_step += 1;
           task.notify( task_order[ current_step ] );
+      }
+
+      else{
+
+        api.end();
+      }
     }
 
     api.end = function(){
