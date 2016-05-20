@@ -1,5 +1,6 @@
 # CJS-TASK #
 ---
+[![Build Status](https://travis-ci.org/Akamaozu/cjs-task.svg?branch=master)](https://travis-ci.org/Akamaozu/cjs-task)
 
 ## Control Flow Like a Pro ##
 
