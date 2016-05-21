@@ -1,6 +1,5 @@
 # CJS-TASK #
 ---
-[![Build Status](https://travis-ci.org/Akamaozu/cjs-task.svg?branch=master)](https://travis-ci.org/Akamaozu/cjs-task)
 
 ## Control Flow Like a Pro ##
 
@@ -17,6 +16,7 @@
 ![Complex Workflows Simplified](http://designbymobi.us/wp-content/uploads/2015/07/sample-task.png)
 
 ## Installation ##
+[![npm version](https://badge.fury.io/js/cjs-task.svg)](https://badge.fury.io/js/cjs-task)[![Build Status](https://travis-ci.org/Akamaozu/cjs-task.svg?branch=master)](https://travis-ci.org/Akamaozu/cjs-task)
 	npm install --save cjs-task
 
 ## Create a Task Instance ##
