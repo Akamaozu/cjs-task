@@ -4,7 +4,7 @@
   "description": "Control Flow Like a Pro",
   "main": "cjs-task.js",
   "scripts": {
-    "test": "mocha"
+    "test": "nyc node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "cjs-noticeboard": "0.0.4"
   },
   "devDependencies": {
-    "mocha": "^2.1.0"
+    "mocha": "^2.1.0",
+    "nyc": "^6.6.1"
   }
 }
