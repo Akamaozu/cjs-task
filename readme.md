@@ -107,6 +107,13 @@ Remove data from task instance's key-value store.
 		* is a string
 		* is required
 
+### task.log( log_entry ) ###
+Stores first argument to an array. Retrieves array is no argument is given.
+
+* **Is a Function**
+* **Parameters**
+	* **log_entry**
+
 ## LICENSE ##
 
 The MIT License (MIT)

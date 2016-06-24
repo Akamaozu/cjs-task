@@ -275,6 +275,14 @@ describe('Task Instance API', function(){
 			assert.equal(requires_string, true, 'first argument does not need to be a string');
 		});
 	});
+
+	describe('task.log', function(){
+
+		it('is a function', function(){
+
+			assert.equal(typeof task.log === 'function', true, 'task.log is not a function');
+		});
+	});
 });
 
 describe('Task Instance Behavior', function(){
@@ -670,6 +678,39 @@ describe('Task Instance Behavior', function(){
 			}
 
 			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
+		});
+	});
+
+	describe('task.log', function(){
+
+		it('returns array of stored arguments if no argument is given', function(){
+
+			var task = cjs_task(),
+					log_entries;
+
+			log_entries = task.log();
+
+			assert.equal( Object.prototype.toString.call( log_entries ) === '[object Array]', true, 'did not return an array' );
+			assert.equal( log_entries.length === 0, true, 'task log should be empty, but isn\'t' );
+		});
+
+		it('stores first argument given', function(){
+
+			var task = cjs_task(),
+					entries_to_log = [1, [], {}, function(){}],
+					log_entries;
+
+			entries_to_log.forEach( function( entry ){
+
+				task.log( entry );
+			});
+
+			log_entries = task.log();
+
+			log_entries.forEach( function( entry, index ){
+
+				assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
+			});
 		});
 	});
 });
