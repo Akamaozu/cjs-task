@@ -4,7 +4,8 @@
   "description": "Control Flow Like a Pro",
   "main": "cjs-task.js",
   "scripts": {
-    "test": "nyc node_modules/mocha/bin/_mocha"
+    "test": "nyc node_modules/mocha/bin/_mocha",
+    "lcov-to-coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
