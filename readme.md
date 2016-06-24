@@ -1,6 +1,6 @@
 # CJS-TASK #
 ---
-[![npm version](https://badge.fury.io/js/cjs-task.svg)](https://badge.fury.io/js/cjs-task) [![Build Status](https://travis-ci.org/Akamaozu/cjs-task.svg?branch=master)](https://travis-ci.org/Akamaozu/cjs-task)
+[![npm version](https://badge.fury.io/js/cjs-task.svg)](https://badge.fury.io/js/cjs-task) [![Build Status](https://travis-ci.org/Akamaozu/cjs-task.svg?branch=master)](https://travis-ci.org/Akamaozu/cjs-task) [![Coverage Status](https://coveralls.io/repos/github/Akamaozu/cjs-task/badge.svg?branch=master)](https://coveralls.io/github/Akamaozu/cjs-task?branch=master)
 
 ## Control Flow Like a Pro ##
 
