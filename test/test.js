@@ -36,6 +36,23 @@ describe('require("cjs-task")', function(){
 			assert.equal( expected_api.indexOf( property ) > -1, true, 'found unexpected property: "' + property + '"'); 
 		}
 	});
+
+	it('if arguments are given, throws error if first argument is not a function', function(){
+
+		var error_thrown = false;
+
+		try {
+
+			var task = cjs_task( [] );
+		}
+
+		catch( e ){
+
+			if( e instanceof Error ) error_thrown = true;
+		}
+
+		assert.equal( error_thrown === true, true, 'did not throw an error ')
+	});
 });
 
 describe('Task Instance API', function(){
