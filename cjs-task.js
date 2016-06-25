@@ -50,7 +50,7 @@ function TaskManager(callback){
 
       started = true;
       
-      if( !task_order ){ task_order = register_order; }
+      task_order = register_order;
 
       task.notify( task_order[current_step] );
     }
