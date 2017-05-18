@@ -6,8 +6,7 @@ var noticeboard = require('cjs-noticeboard');
 
 function TaskManager(callback){
 
-  var task, 
-    register_order,
+  var task,
     current_step,
     task_order,
     started,
@@ -16,8 +15,8 @@ function TaskManager(callback){
     api;
 
     task = new noticeboard({logging: false});
-    register_order = [];
     current_step = 0;
+    task_order = [];
     store = {};
     log = [];
     api = {};
@@ -41,7 +40,7 @@ function TaskManager(callback){
       if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
 
       task.once(name, 'task-manager', step);
-      register_order.push( name );
+      task_order.push( name );
     }
 
     api.start = function(){
@@ -49,8 +48,6 @@ function TaskManager(callback){
       if( started ) throw new Error('TASK HAS ALREADY STARTED');
 
       started = true;
-      
-      task_order = register_order;
 
       task.notify( task_order[current_step] );
     }
