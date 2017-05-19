@@ -51,8 +51,7 @@ function TaskManager(callback){
     if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
     if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
 
-    noticeboard.once(name, 'task-manager', step);
-    step_order.push( name );
+    step_order.push({ name: name, step: step });
   }
 
   function start_task(){
@@ -61,7 +60,7 @@ function TaskManager(callback){
     if( step_order.length < 1 ) throw new Error('TASK HAS NO STEPS TO RUN');
 
     started = true;
-    noticeboard.notify( step_order[current_step] );
+    setTimeout( step_order[0].step, 0 );
   }
 
   function run_next_task_step(){
@@ -71,7 +70,7 @@ function TaskManager(callback){
     if( current_step < (step_order.length - 1) ){
 
       current_step += 1;
-      noticeboard.notify( step_order[ current_step ] );
+      setTimeout( step_order[ current_step ].step, 0 );
     }
 
     else api.end();
