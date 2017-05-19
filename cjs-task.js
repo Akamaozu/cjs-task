@@ -58,6 +58,7 @@ function TaskManager(callback){
   function start_task(){
 
     if( started ) throw new Error('TASK HAS ALREADY STARTED');
+    if( step_order.length < 1 ) throw new Error('TASK HAS NO STEPS TO RUN');
 
     started = true;
     noticeboard.notify( step_order[current_step] );

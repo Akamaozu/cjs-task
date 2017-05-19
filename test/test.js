@@ -351,6 +351,22 @@ describe('Task Instance Behavior', function(){
 
 			task.start();
 		});
+
+		it('throws an error if there are no steps to run', function(){
+
+			var task = cjs_task(),
+					error_thrown = false;
+
+			try{
+				task.start();
+			}
+
+			catch(e){
+				error_thrown = true;
+			}
+
+			assert.equal(error_thrown, true, 'error not thrown');
+		});
 	});
 
 	describe('task.step', function(){
