@@ -557,16 +557,22 @@ describe('Task Instance Behavior', function(){
 
 			var task = cjs_task(function(){
 				default_callback = true;
+				do_assertions();
 			});
+
+			task.step('step 1', task.next);
 
 			task.callback(function(){
 				modified_callback = true;
+				do_assertions();
 			});
 
-			task.end();
+			task.start();
 
-			assert(default_callback === false, true, 'default callback was triggered');
-			assert(modified_callback === true, true, 'modified callback was not triggered');
+			function do_assertions(){
+				assert(default_callback === false, true, 'default callback was triggered');
+				assert(modified_callback === true, true, 'modified callback was not triggered');
+			}
 		});
 	});
 
