@@ -1,28 +1,18 @@
-// TASK MANAGER
+var noticeboard = require('cjs-noticeboard');
 
 module.exports = TaskManager;
 
-var noticeboard = require('cjs-noticeboard');
-
 function TaskManager(callback){
 
-  var task,
-    current_step,
-    task_order,
-    started,
-    store,
-    log,
-    api;
+  var task = new noticeboard({logging: false}),
+      current_step = 0,
+      task_order = [],
+      store = {},
+      log = [],
+      api = {};
 
-    task = new noticeboard({logging: false});
-    current_step = 0;
-    task_order = [];
-    store = {};
-    log = [];
-    api = {};
-
-    if(!callback){ callback = function(){} }
-    if(typeof callback !== 'function'){ throw new Error('TASK CALLBACK MUST BE A FUNCTION'); }
+  if(!callback){ callback = function(){} }
+  if(typeof callback !== 'function'){ throw new Error('TASK CALLBACK MUST BE A FUNCTION'); }
 
   // DEFINE API
     api.callback = function(end_callback){
@@ -48,7 +38,6 @@ function TaskManager(callback){
       if( started ) throw new Error('TASK HAS ALREADY STARTED');
 
       started = true;
-
       task.notify( task_order[current_step] );
     }
 
@@ -56,14 +45,11 @@ function TaskManager(callback){
 
       if( current_step < (task_order.length - 1) ){ 
 
-          current_step += 1;
-          task.notify( task_order[ current_step ] );
+        current_step += 1;
+        task.notify( task_order[ current_step ] );
       }
 
-      else{
-
-        api.end();
-      }
+      else api.end();
     }
 
     api.end = function(){
@@ -90,7 +76,6 @@ function TaskManager(callback){
       if(typeof value === 'undefined'){ throw new Error('NEED A VALUE TO STORE'); }
       if(typeof key !== 'string'){ throw new Error('KEY MUST BE A STRING'); }
 
-
       store[key] = value;
     }
 
@@ -104,15 +89,8 @@ function TaskManager(callback){
 
     api.log = function(entry){
 
-      if(typeof entry !== "undefined"){
-
-        log.push(entry);
-      }
-
-      else {
-
-        return log;
-      }
+      if(typeof entry !== "undefined") log.push(entry);
+      else return log;
     }
 
   return api;
