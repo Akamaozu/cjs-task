@@ -77,7 +77,6 @@ function TaskManager(callback){
   function end_task(){
     
     callback.apply(callback, arguments);
-
     store = noticeboard = log = api = null;
   }
 
