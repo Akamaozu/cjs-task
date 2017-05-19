@@ -39,7 +39,6 @@ function TaskManager(callback){
   
   function set_task_callback(end_callback){
 
-    if(!end_callback) return;
     if(typeof end_callback !== 'function'){ throw new Error('TASK CALLBACK MUST BE A FUNCTION'); }
 
     callback = end_callback;
@@ -110,7 +109,7 @@ function TaskManager(callback){
   }
 
   function create_task_log_entry(entry){
-    if(typeof entry !== "undefined") log.push(entry);
+    log.push(entry);
   }
 
   function get_task_log(){
