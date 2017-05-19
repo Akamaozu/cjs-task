@@ -512,6 +512,24 @@ describe('Task Instance Behavior', function(){
 
 			task.start();
 		});
+
+		it('will throw an error if called before task starts', function(){
+
+			var task = cjs_task(),
+					threw_error = false;
+
+			task.step('step 1', task.next);
+
+			try{
+				task.end();
+			}
+
+			catch(e){
+				threw_error = true;
+			}
+
+			assert.equal(threw_error, true, 'did not throw error');
+		});
 	});
 
 	describe('task.callback', function(){

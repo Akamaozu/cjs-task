@@ -77,6 +77,8 @@ function TaskManager(callback){
   }
 
   function end_task(){
+
+    if( !started ) throw new Error('CAN\'T CALL NEXT STEP BEFORE TASK STARTS');
     
     callback.apply(callback, arguments);
     store = noticeboard = log = api = null;
