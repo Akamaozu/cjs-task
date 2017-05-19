@@ -653,6 +653,13 @@ describe('Task Instance Behavior', function(){
 			assert.equal(set_value === get_value, true, 'retrieved value does not match set value');
 		});
 
+		it('returns null if key has no stored value', function(){
+
+			var task = cjs_task();
+
+			assert.equal( task.get( 'test' ), null, 'did not return null');
+		});
+
 		it('throws an error if no key is given', function(){
 
 			var task = cjs_task(),
