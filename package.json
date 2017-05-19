@@ -26,9 +26,6 @@
     "url": "http://designbymobi.us"
   },
   "license": "MIT",
-  "dependencies": {
-    "cjs-noticeboard": "0.0.4"
-  },
   "devDependencies": {
     "coveralls": "^2.11.9",
     "mocha": "^2.1.0",

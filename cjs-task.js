@@ -1,11 +1,8 @@
-var Noticeboard = require('cjs-noticeboard');
-
 module.exports = TaskManager;
 
 function TaskManager(callback){
 
-  var noticeboard = new Noticeboard({logging: false}),
-      current_step = 0,
+  var current_step = 0,
       step_order = [],
       store = {},
       log = [],
