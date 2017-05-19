@@ -795,4 +795,25 @@ describe('Task Instance Behavior', function(){
 			});
 		});
 	});
+
+	describe('task', function(){
+		it('will run even if no callback is specified', function(done){
+
+			var task = cjs_task(),
+					ran = false;
+
+			task.step('step 1', task.next);
+			task.step('step 2', task.next);
+			task.step('step 3', function(){
+				ran = true;
+			});
+
+			task.start();
+
+			setTimeout( function(){
+				assert( ran, true, 'did not run task');
+				done()
+			}, 888 );
+		});
+	});
 });
