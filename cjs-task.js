@@ -6,7 +6,7 @@ function TaskManager(callback){
 
   var noticeboard = new Noticeboard({logging: false}),
       current_step = 0,
-      task_order = [],
+      step_order = [],
       store = {},
       log = [],
       api = {},
@@ -52,7 +52,7 @@ function TaskManager(callback){
     if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
 
     noticeboard.once(name, 'task-manager', step);
-    task_order.push( name );
+    step_order.push( name );
   }
 
   function start_task(){
@@ -60,17 +60,17 @@ function TaskManager(callback){
     if( started ) throw new Error('TASK HAS ALREADY STARTED');
 
     started = true;
-    noticeboard.notify( task_order[current_step] );
+    noticeboard.notify( step_order[current_step] );
   }
 
   function run_next_task_step(){
 
     if( !started ) throw new Error('CAN\'T CALL NEXT STEP BEFORE TASK STARTS');
 
-    if( current_step < (task_order.length - 1) ){ 
+    if( current_step < (step_order.length - 1) ){
 
       current_step += 1;
-      noticeboard.notify( task_order[ current_step ] );
+      noticeboard.notify( step_order[ current_step ] );
     }
 
     else api.end();
