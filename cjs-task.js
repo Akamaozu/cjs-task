@@ -1,10 +1,10 @@
-var noticeboard = require('cjs-noticeboard');
+var Noticeboard = require('cjs-noticeboard');
 
 module.exports = TaskManager;
 
 function TaskManager(callback){
 
-  var task = new noticeboard({logging: false}),
+  var noticeboard = new Noticeboard({logging: false}),
       current_step = 0,
       task_order = [],
       store = {},
@@ -51,7 +51,7 @@ function TaskManager(callback){
     if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
     if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
 
-    task.once(name, 'task-manager', step);
+    noticeboard.once(name, 'task-manager', step);
     task_order.push( name );
   }
 
@@ -60,7 +60,7 @@ function TaskManager(callback){
     if( started ) throw new Error('TASK HAS ALREADY STARTED');
 
     started = true;
-    task.notify( task_order[current_step] );
+    noticeboard.notify( task_order[current_step] );
   }
 
   function run_next_task_step(){
@@ -68,7 +68,7 @@ function TaskManager(callback){
     if( current_step < (task_order.length - 1) ){ 
 
       current_step += 1;
-      task.notify( task_order[ current_step ] );
+      noticeboard.notify( task_order[ current_step ] );
     }
 
     else api.end();
@@ -78,7 +78,7 @@ function TaskManager(callback){
     
     callback.apply(callback, arguments);
 
-    store = task = log = api = null;
+    store = noticeboard = log = api = null;
   }
 
   function delete_task_varable(key){
