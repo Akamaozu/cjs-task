@@ -65,6 +65,8 @@ function TaskManager(callback){
 
   function run_next_task_step(){
 
+    if( !started ) throw new Error('CAN\'T CALL NEXT STEP BEFORE TASK STARTS');
+
     if( current_step < (task_order.length - 1) ){ 
 
       current_step += 1;

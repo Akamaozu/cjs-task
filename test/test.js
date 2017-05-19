@@ -471,7 +471,7 @@ describe('Task Instance Behavior', function(){
 			task.start();
 		});
 
-		it('will throw an error if called before task starts', function(done){
+		it('will throw an error if called before task starts', function(){
 
 			var task = cjs_task(),
 					threw_error = false;
