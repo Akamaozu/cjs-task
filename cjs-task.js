@@ -43,10 +43,8 @@ function TaskManager(callback){
 
   function create_task_step(name, step){
 
-    if(!name){ throw new Error('TASKS CAN\'T HAVE UNNAMED STEPS'); }
-    if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
-    if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
-
+    validate_step_requirements(name, step);
+    
     step_order.push({ name: name, step: step });
   }
 
@@ -78,6 +76,13 @@ function TaskManager(callback){
     
     callback.apply(callback, arguments);
     store = noticeboard = log = api = null;
+  }
+
+  function validate_step_requirements(name, step){
+
+    if(!name){ throw new Error('TASKS CAN\'T HAVE UNNAMED STEPS'); }
+    if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
+    if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
   }
 
   function delete_task_varable(key){
