@@ -813,7 +813,7 @@ describe('Task Instance Behavior', function(){
 			setTimeout( function(){
 				assert( ran, true, 'did not run task');
 				done()
-			}, 888 );
+			}, 88 );
 		});
 	});
 });
