@@ -413,6 +413,74 @@ describe('Task Instance Behavior', function(){
 				assert.equal(steps_executed[2] === false, true, 'step 2 was executed without task.next()');
 			}, 50);
 		});
+
+		it('will insert steps after current step if used AFTER task has started', function(done){
+
+			var task = cjs_task(),
+					expect = [ 1, '1a', '1b', 2, '2a', '2aa', '2ab', '2b' ],
+					result = [];
+
+			task.step( '1', function(){
+
+				result.push(1);
+
+				task.step( '1a', function(){
+					result.push('1a');
+					task.next();
+				});
+
+				task.step( '1b', function(){
+					result.push('1b');
+					task.next();
+				});
+
+				task.next();
+			});
+
+			task.step( '2', function(){
+				result.push(2);
+
+				task.step( '2a', function(){
+					result.push('2a');
+
+						task.step( '2aa', function(){
+
+							result.push('2aa');
+							task.next();
+						});
+
+						task.step( '2ab', function(){
+
+							result.push('2ab');
+							task.next();
+						});
+
+					task.next();
+				});
+
+				task.step( '2b', function(){
+
+					result.push('2b');
+					task.next();
+				});
+
+				task.next();
+			});
+
+			task.callback( function(){
+
+				var matching = true;
+
+				expect.forEach( function( entry, i ){
+					if( entry != result[ i ] ) matching = false;
+				});
+
+				assert.equal( matching, true, 'result does not match expected pattern' );
+				done();
+			});
+
+			task.start();
+		});
 	});
 
 	describe('task.next', function(){

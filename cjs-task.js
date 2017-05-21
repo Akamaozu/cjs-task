@@ -7,6 +7,7 @@ function TaskManager(callback){
       store = {},
       log = [],
       api = {},
+      insertions = 0,
       started;
 
   if(!callback){ callback = function(){} }
@@ -17,8 +18,8 @@ function TaskManager(callback){
   
   // control flow
     api.start = start_task;
-    api.next = run_next_task_step;
     api.end = end_task;
+    api.next = run_next_task_step;
 
   // configuration
     api.get = get_task_variable;
@@ -43,9 +44,17 @@ function TaskManager(callback){
 
   function create_task_step(name, step){
 
-    validate_step_requirements(name, step);
+    if(!name){ throw new Error('TASKS CAN\'T HAVE UNNAMED STEPS'); }
+    if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
+    if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
     
-    step_order.push({ name: name, step: step });
+    if( !started ) step_order.push({ name: name, step: step });
+
+    else {
+
+      step_order.splice( current_step + 1 + insertions, 0, { name: name, step: step });
+      insertions += 1;
+    }
   }
 
   function start_task(){
@@ -64,6 +73,7 @@ function TaskManager(callback){
     if( current_step < (step_order.length - 1) ){
 
       current_step += 1;
+      insertions = 0;
       setTimeout( step_order[ current_step ].step, 0 );
     }
 
@@ -76,13 +86,6 @@ function TaskManager(callback){
     
     callback.apply(callback, arguments);
     store = noticeboard = log = api = null;
-  }
-
-  function validate_step_requirements(name, step){
-
-    if(!name){ throw new Error('TASKS CAN\'T HAVE UNNAMED STEPS'); }
-    if(typeof name !== 'string'){ throw new Error('STEP NAMES MUST BE STRINGS'); }
-    if(!step || typeof step !== "function"){ throw new Error('TASK STEPS ARE FUNCTIONS'); }
   }
 
   function delete_task_varable(key){
