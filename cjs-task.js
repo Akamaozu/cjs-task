@@ -7,19 +7,25 @@ function TaskManager(callback){
       store = {},
       log = [],
       api = {},
+      steps_run = 0,
+      steps_deleted = 0,
       insertions = 0,
       started;
 
   if(!callback){ callback = function(){} }
   if(typeof callback !== 'function'){ throw new Error('TASK CALLBACK MUST BE A FUNCTION'); }
   
-  // break task down into individual steps
-    api.step = create_task_step;
+  // stats
+    api.stats = {
+      steps_run: function(){ return steps_run },
+      steps_deleted: function(){ return steps_deleted }
+    };
   
   // control flow
     api.start = start_task;
-    api.end = end_task;
+    api.step = create_task_step;
     api.next = run_next_task_step;
+    api.end = end_task;
 
   // configuration
     api.get = get_task_variable;
@@ -63,6 +69,7 @@ function TaskManager(callback){
     if( step_order.length < 1 ) throw new Error('TASK HAS NO STEPS TO RUN');
 
     started = true;
+
     setTimeout( step_order[0].step, 0 );
   }
 
@@ -70,10 +77,13 @@ function TaskManager(callback){
 
     if( !started ) throw new Error('CAN\'T CALL NEXT STEP BEFORE TASK STARTS');
 
+    steps_run += 1;
+
     if( current_step < (step_order.length - 1) ){
 
       current_step += 1;
       insertions = 0;
+
       setTimeout( step_order[ current_step ].step, 0 );
     }
 
