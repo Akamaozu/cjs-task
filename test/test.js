@@ -1,6 +1,6 @@
 var assert = require('assert');
 var cjs_task = require('../cjs-task.js');
-var expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log'];
+var expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log', 'stats'];
 var matches_expected_api = false;
 
 describe('require("cjs-task")', function(){
@@ -298,6 +298,23 @@ describe('Task Instance API', function(){
 		it('is a function', function(){
 
 			assert.equal(typeof task.log === 'function', true, 'task.log is not a function');
+		});
+	});
+
+	describe('task.stats', function(){
+		it('is an object', function(){
+			assert.equal(Object.prototype.toString.call( task.stats ) === '[object Object]', true, 'task.stats is not an object');
+		});
+
+		it('all properties are functions', function(){
+			var non_function_props_found = [];
+
+			for( var key in task.stats ){
+				if( ! task.stats.hasOwnProperty( key ) ) continue;
+				if( typeof task.stats[ key ] !== 'function' ) non_function_props_found.push( key );
+			}
+
+			assert.equal( non_function_props_found.length === 0, true, 'non-function stats props found: ' + non_function_props_found.join( ', ' ) );
 		});
 	});
 });
@@ -882,6 +899,29 @@ describe('Task Instance Behavior', function(){
 				assert( ran, true, 'did not run task');
 				done()
 			}, 88 );
+		});
+
+		it('deletes steps after execution', function(done){
+			var task = cjs_task(),
+					timed_out = false;
+
+			task.set( 'shortcircuit-timer', setTimeout(
+				function(){
+					clearTimeout( task.get( 'shortcircuit-timer' ) );
+					task.end( new Error( 'timed out' ) );
+				}, 1000
+			) );
+
+			task.step('step 1', task.next);
+			task.step('step 2', task.next);
+			task.step('step 3', task.next);
+
+			task.callback( function(){
+				assert( timed_out === false, true, 'task timed out');
+				done();
+			});
+
+			task.start();
 		});
 	});
 });
