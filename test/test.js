@@ -1,7 +1,6 @@
 var assert = require('assert');
 var cjs_task = require('../cjs-task.js');
 var expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log', 'stats'];
-var matches_expected_api = false;
 
 describe('require("cjs-task")', function(){
 	
@@ -302,6 +301,8 @@ describe('Task Instance API', function(){
 	});
 
 	describe('task.stats', function(){
+		var expected_properties = [ 'steps_run', 'steps_deleted' ];
+
 		it('is an object', function(){
 			assert.equal(Object.prototype.toString.call( task.stats ) === '[object Object]', true, 'task.stats is not an object');
 		});
@@ -315,6 +316,24 @@ describe('Task Instance API', function(){
 			}
 
 			assert.equal( non_function_props_found.length === 0, true, 'non-function stats props found: ' + non_function_props_found.join( ', ' ) );
+		});
+
+		it('has no unexpected properties', function(){
+			for(var i = expected_properties.length - 1; i >= 0; i--) {
+
+				var api_name = expected_properties[i];
+				assert.equal(typeof task.stats[ api_name ] !== 'undefined', true, 'task.stats is missing "' + api_name + '" property')
+			};
+		});
+
+		it('has every expected property', function(){
+			var found_expected_properties = 0;
+
+			expected_properties.forEach( function( key ){
+				if( expected_properties.indexOf( key ) > -1 ) found_expected_properties += 1;
+			});
+
+			assert.equal( found_expected_properties == expected_properties.length, true, 'number of properties found does not match expectations' );
 		});
 	});
 });
@@ -849,6 +868,39 @@ describe('Task Instance Behavior', function(){
 	});
 
 	describe('task.log', function(){
+
+		it('returns array of stored arguments if no argument is given', function(){
+
+			var task = cjs_task(),
+					log_entries;
+
+			log_entries = task.log();
+
+			assert.equal( Object.prototype.toString.call( log_entries ) === '[object Array]', true, 'did not return an array' );
+			assert.equal( log_entries.length === 0, true, 'task log should be empty, but isn\'t' );
+		});
+
+		it('stores first argument given', function(){
+
+			var task = cjs_task(),
+					entries_to_log = [1, [], {}, function(){}],
+					log_entries;
+
+			entries_to_log.forEach( function( entry ){
+
+				task.log( entry );
+			});
+
+			log_entries = task.log();
+
+			log_entries.forEach( function( entry, index ){
+
+				assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
+			});
+		});
+	});
+
+	describe('task.stats', function(){
 
 		it('returns array of stored arguments if no argument is given', function(){
 
