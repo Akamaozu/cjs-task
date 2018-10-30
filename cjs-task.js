@@ -79,19 +79,16 @@ function TaskManager(callback){
 
     steps_run += 1;
 
-    if( current_step < (step_order.length - 1) ){
+    // remove previously completed step
+      step_order.shift();
+      steps_deleted += 1;
+      insertions = 0;
 
-      // run next step
-        current_step += 1;
-        insertions = 0;
-        setTimeout( step_order[ current_step ].step, 0 );
+    // end task if no more steps remain
+      var should_end_task = step_order.length === 0;
+      if( should_end_task ) return api.end();
 
-      // remove previously completed step
-        step_order.shift();
-        current_step -= 1;
-    }
-
-    else api.end();
+    setTimeout( step_order[ current_step ].step, 0 );
   }
 
   function end_task(){
