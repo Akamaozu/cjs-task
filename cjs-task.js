@@ -88,7 +88,8 @@ function TaskManager(callback){
       var should_end_task = step_order.length === 0;
       if( should_end_task ) return api.end();
 
-    setTimeout( step_order[ current_step ].step, 0 );
+    // async run next step
+      setTimeout( step_order[ current_step ].step, 0 );
   }
 
   function end_task(){
