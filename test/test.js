@@ -969,7 +969,12 @@ describe('Task Instance Behavior', function(){
 			task.step('step 3', task.next);
 
 			task.callback( function(){
-				assert( timed_out === false, true, 'task timed out');
+				assert.equal( timed_out === false, true, 'task timed out');
+
+				var steps_run = task.stats.steps_run(),
+						steps_deleted = task.stats.steps_deleted();
+
+				assert.equal( steps_run === steps_deleted, true, 'total steps run ('+ steps_run +') does not match total steps deleted ('+ steps_deleted +')');
 				done();
 			});
 
