@@ -81,10 +81,14 @@ function TaskManager(callback){
 
     if( current_step < (step_order.length - 1) ){
 
-      current_step += 1;
-      insertions = 0;
+      // run next step
+        current_step += 1;
+        insertions = 0;
+        setTimeout( step_order[ current_step ].step, 0 );
 
-      setTimeout( step_order[ current_step ].step, 0 );
+      // remove previously completed step
+        step_order.shift();
+        current_step -= 1;
     }
 
     else api.end();
