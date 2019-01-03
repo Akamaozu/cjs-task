@@ -19,7 +19,7 @@ function create_task( callback ){
   // control flow
     api.start = start_task;
     api.step = create_task_step;
-    api.next = run_next_task_step;
+    api.next = start_next_task_step;
     api.end = end_task;
 
   // configuration
@@ -36,7 +36,7 @@ function create_task( callback ){
 
   // logging
     api.log = function( entry ){
-      if( entry ) create_task_log_entry(entry);
+      if( entry ) create_task_log_entry( entry );
       else return get_task_log();
     };
 
@@ -65,15 +65,15 @@ function create_task( callback ){
     if( step_order.length < 1 ) throw new Error( 'TASK HAS NO STEPS TO RUN' );
 
     started = true;
-    _yield( step_order[0].step );
+    run_step();
   }
 
-  function run_next_task_step(){
+  function start_next_task_step(){
     if( ! started ) throw new Error( 'CAN\'T CALL NEXT STEP BEFORE TASK STARTS' );
 
     steps_run += 1;
 
-    // remove previously completed step
+    // remove completed step
       step_order.shift();
       steps_deleted += 1;
 
@@ -82,16 +82,28 @@ function create_task( callback ){
 
     // end task if no more steps remain
       var should_end_task = step_order.length === 0;
-      if( should_end_task ) return api.end();
+      if( should_end_task ) return end_task();
 
-    // run next step
-      _yield( step_order[ current_step ].step );
+    // else run next step
+      run_step();
+  }
+
+  function run_step(){
+
+    _yield( function(){
+      try {
+        step_order[ current_step ].step();
+      }
+      catch( error ){
+        end_task( error );
+      }
+    });
   }
 
   function end_task(){
     if( ! started ) throw new Error( 'CAN\'T CALL NEXT STEP BEFORE TASK STARTS' );
     
-    callback.apply(callback, arguments);
+    callback.apply( callback, arguments );
     store = log = api = null;
   }
 
@@ -114,11 +126,11 @@ function create_task( callback ){
     if( ! key ) throw new Error( 'NEED A KEY TO RETRIEVE DATA' );
     if( typeof key !== 'string' ) throw new Error( 'KEY MUST BE A STRING' );
 
-    return ( typeof store[key] !== 'undefined' ? store[ key ] : null );
+    return ( typeof store[ key ] !== 'undefined' ? store[ key ] : null );
   }
 
   function create_task_log_entry( entry ){
-    log.push(entry);
+    log.push( entry );
   }
 
   function get_task_log(){
