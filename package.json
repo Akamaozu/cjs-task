@@ -30,5 +30,8 @@
     "coveralls": "^2.11.9",
     "mocha": "^2.1.0",
     "nyc": "^6.6.1"
+  },
+  "dependencies": {
+    "cjs-yield": "^1.0.1"
   }
 }

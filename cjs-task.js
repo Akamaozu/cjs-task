@@ -1,3 +1,5 @@
+var _yield = require('cjs-yield');
+
 module.exports = TaskManager;
 
 function TaskManager(callback){
@@ -89,7 +91,7 @@ function TaskManager(callback){
       if( should_end_task ) return api.end();
 
     // async run next step
-      setTimeout( step_order[ current_step ].step, 0 );
+      _yield( step_order[ current_step ].step );
   }
 
   function end_task(){
