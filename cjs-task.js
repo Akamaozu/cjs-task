@@ -15,7 +15,7 @@ function create_task( callback ){
 
   if( ! callback ) callback = default_task_callback;
   if( typeof callback !== 'function' ) throw new Error( 'TASK CALLBACK MUST BE A FUNCTION' );
-  
+
   // control flow
     api.start = start_task;
     api.step = create_task_step;
@@ -41,7 +41,7 @@ function create_task( callback ){
     };
 
   return api;
-  
+
   function set_task_callback( end_callback ){
     if( typeof end_callback !== 'function' ) throw new Error( 'TASK CALLBACK MUST BE A FUNCTION' );
     else callback = end_callback;
@@ -51,7 +51,6 @@ function create_task( callback ){
     if( ! name ) throw new Error( 'TASKS CAN\'T HAVE UNNAMED STEPS' );
     if( typeof name !== 'string' ) throw new Error( 'STEP NAMES MUST BE STRINGS' );
     if( ! step || typeof step !== 'function' ) throw new Error( 'TASK STEPS ARE FUNCTIONS' );
-    
 
     if( ! started ) step_order.push({ name: name, step: step });
     else {
@@ -102,7 +101,7 @@ function create_task( callback ){
 
   function end_task(){
     if( ! started ) throw new Error( 'CAN\'T CALL NEXT STEP BEFORE TASK STARTS' );
-    
+
     callback.apply( callback, arguments );
     store = log = api = null;
   }
