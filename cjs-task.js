@@ -4,15 +4,15 @@ var _yield = require('cjs-yield'),
 module.exports = create_task;
 
 function create_task( callback ){
-  var current_step = 0,
+  var hook = create_hooks_instance(),
       step_order = [],
       store = {},
       log = [],
       api = {},
+      current_step = 0,
+      insertions = 0,
       steps_run = 0,
       steps_deleted = 0,
-      insertions = 0,
-      hook = create_hooks_instance(),
       started;
 
   if( ! callback ) callback = default_task_callback;
@@ -29,7 +29,9 @@ function create_task( callback ){
     api.set = set_task_variable;
     api.unset = delete_task_varable;
     api.callback = set_task_callback;
-    api.hook = create_hooks_instance();
+
+  // pluggable
+    api.hook = hook;
 
   // stats
     api.stats = {
