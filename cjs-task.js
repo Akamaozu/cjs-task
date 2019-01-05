@@ -68,6 +68,8 @@ function create_task( callback ){
     if( started ) throw new Error( 'TASK HAS ALREADY STARTED' );
     if( step_order.length < 1 ) throw new Error( 'TASK HAS NO STEPS TO RUN' );
 
+    hook.run( 'task-start', { start_time: Date.now() });
+
     started = true;
     run_step();
   }
