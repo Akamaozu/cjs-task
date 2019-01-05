@@ -287,6 +287,42 @@ describe('Task Instance API', function(){
       assert.equal( found_expected_properties == expected_properties.length, true, 'number of properties found does not match expectations' );
     });
   });
+
+  describe('task.hook', function(){
+    var expected_properties = [ 'run', 'end', 'add', 'del', 'delete' ];
+
+    it('is an object', function(){
+      assert.equal(Object.prototype.toString.call( task.stats ) === '[object Object]', true, 'task.hook is not an object');
+    });
+
+    it('all properties are functions', function(){
+      var non_function_props_found = [];
+
+      for( var key in task.hook ){
+        if( ! task.hook.hasOwnProperty( key ) ) continue;
+        if( typeof task.hook[ key ] !== 'function' ) non_function_props_found.push( key );
+      }
+
+      assert.equal( non_function_props_found.length === 0, true, 'non-function hook prop(s) found: ' + non_function_props_found.join( ', ' ) );
+    });
+
+    it('has no unexpected properties', function(){
+      for(var i = expected_properties.length - 1; i >= 0; i--) {
+        var api_name = expected_properties[i];
+        assert.equal(typeof task.hook[ api_name ] !== 'undefined', true, 'task.hook is missing "' + api_name + '" property')
+      };
+    });
+
+    it('has every expected property', function(){
+      var found_expected_properties = 0;
+
+      expected_properties.forEach( function( key ){
+        if( expected_properties.indexOf( key ) > -1 ) found_expected_properties += 1;
+      });
+
+      assert.equal( found_expected_properties == expected_properties.length, true, 'number of properties found does not match expectations' );
+    });
+  });
 });
 
 describe('Task Instance Behavior', function(){
@@ -342,6 +378,27 @@ describe('Task Instance Behavior', function(){
       }
 
       assert.equal( error_thrown, true, 'error not thrown' );
+    });
+
+    it('runs hook "task-start" when successful', function( done ){
+      var task = cjs_task(),
+          hook_run = false;
+
+      task.hook.add( 'task-start', 'update hook_run var', function(){
+        hook_run = true;
+      });
+
+      task.step( 'do assertion', function(){
+        assert.equal( hook_run, true, 'task-start hook not run' );
+        task.next();
+      });
+
+      task.callback( function( error ){
+        if( error ) throw error;
+        done();
+      });
+
+      task.start();
     });
   });
 
@@ -446,21 +503,37 @@ describe('Task Instance Behavior', function(){
 
       task.start();
     });
+
+    it('runs hook "step-created" when successful', function(){
+      var task = cjs_task(),
+          step_name = 'test',
+          step_created = false,
+          step_name_received = false;
+
+      task.hook.add( 'step-created', 'update step_created var', function( received_step_name ){
+        step_created = true;
+        step_name_received = step_name === received_step_name;
+      });
+
+      task.step( step_name, function(){
+        task.next();
+      });
+
+      assert.equal( step_created, true, 'step-created hook not run' );
+      assert.equal( step_name_received, true, 'received step name did not match expected name' );
+    });
   });
 
   describe('task.next', function(){
 
     it('executes next step after task has started', function(done){
-
-      var progressed_to_next_step = false;
-      var task = cjs_task();
+      var task = cjs_task(),
+          progressed_to_next_step = false;
 
       task.step('step 1', task.next);
 
       task.step('step 2', function(){
-
         progressed_to_next_step = true;
-
         done();
 
         assert.equal(progressed_to_next_step === true, true, 'did not progress to the next step');
@@ -496,7 +569,7 @@ describe('Task Instance Behavior', function(){
       }, 50);
     });
 
-    it('executes task callback if there are no more steps', function(done){
+    it('ends task if there are no more steps', function(done){
       var task = cjs_task(),
           triggered_callback = false;
 
@@ -527,6 +600,32 @@ describe('Task Instance Behavior', function(){
       }
 
       assert.equal(threw_error, true, 'did not throw error');
+    });
+
+    it('runs hook "step-end" when successful', function( done ){
+      var task = cjs_task(),
+          step_name = 'test',
+          step_ended = false,
+          step_name_received = false;
+
+      task.hook.add( 'step-end', 'update step_ended var', function( received_step_name ){
+        step_ended = true;
+        step_name_received = step_name === received_step_name;
+      });
+
+      task.step( step_name, function(){
+        task.next();
+      });
+
+      task.callback( function( error ){
+        if( error ) throw error;
+
+        done();
+        assert.equal( step_ended, true, 'step-end hook not run' );
+        assert.equal( step_name_received, true, 'received step name did not match expected name' );
+      });
+
+      task.start();
     });
   });
 
@@ -564,6 +663,33 @@ describe('Task Instance Behavior', function(){
       }
 
       assert.equal(threw_error, true, 'did not throw error');
+    });
+
+    it('runs hook "task-end" when successful', function( done ){
+      var task = cjs_task(),
+          task_ended = false,
+          execution_order = [];
+
+      task.hook.add( 'task-end', 'update task_ended var', function( received_step_name ){
+        task_ended = true;
+        execution_order.push( 'hook' );
+      });
+
+      task.step( 'end task', function(){
+        task.end();
+      });
+
+      task.callback( function( error ){
+        if( error ) throw error;
+        execution_order.push( 'callback' );
+
+        done();
+        assert.equal( task_ended, true, 'task-end hook not run' );
+        assert.equal( execution_order.length === 2, true, 'unexpected execution order' );
+        assert.equal( execution_order[0] === 'hook' && execution_order[1] === 'callback', true, 'unexpected execution order' );
+      });
+
+      task.start();
     });
   });
 
@@ -643,6 +769,25 @@ describe('Task Instance Behavior', function(){
       }
 
       assert.equal(error_thrown === true, true, 'no error thrown when given no value to store');
+    });
+
+    it('runs hook "value-updated" when successful', function( done ){
+      var task = cjs_task(),
+          key = 'key',
+          value = 'value',
+          value_updated = false;
+
+      task.hook.add( 'value-updated', 'update value_updated var', function( details ){
+        if( details.key !== key ) return;
+        else done();
+
+        value_updated = true;
+
+        assert.equal( value_updated, true, 'value-updated hook did not run' );
+        assert.equal( details.value === value, true, 'unexpected value received' );
+      });
+
+      task.set( key, value );
     });
   });
 
@@ -749,6 +894,25 @@ describe('Task Instance Behavior', function(){
 
       assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
     });
+
+    it('runs hook "value-updated" when successful', function( done ){
+      var task = cjs_task(),
+          key = 'key',
+          value = 'value',
+          value_updated = false;
+
+      task.hook.add( 'value-updated', 'update value_updated var', function( details ){
+        if( details.key !== key ) return;
+        else done();
+
+        value_updated = true;
+
+        assert.equal( value_updated, true, 'value-updated hook did not run' );
+        assert.equal( details.value === value, true, 'unexpected value received' );
+      });
+
+      task.set( key, value );
+    });
   });
 
   describe('task.log', function(){
@@ -813,18 +977,25 @@ describe('Task Instance Behavior', function(){
 
     it('will run even if no callback is specified', function(done){
       var task = cjs_task(),
-          ran = false;
+          ran = false,
+          task_end_hook_ran = false;
+
+      task.hook.add( 'task-end', 'update task_end_hook_ran', function(){
+        task_end_hook_ran = true;
+      });
 
       task.step('step 1', task.next);
       task.step('step 2', task.next);
       task.step('step 3', function(){
         ran = true;
+        task.next();
       });
 
       task.start();
 
       setTimeout( function(){
         assert( ran, true, 'did not run task');
+        assert( task_end_hook_ran, true, 'task-end hook was not run');
         done()
       }, 88 );
     });
@@ -852,6 +1023,24 @@ describe('Task Instance Behavior', function(){
 
         assert.equal( steps_run === steps_deleted, true, 'total steps run ('+ steps_run +') does not match total steps deleted ('+ steps_deleted +')');
         done();
+      });
+
+      task.start();
+    });
+
+    it('automatically catches errors thrown in steps and ends task', function( done ){
+      var task = cjs_task(),
+          error_message = 'HULK SMASH!';
+
+      task.step( 'throw error', function(){
+        throw new Error( error_message );
+      });
+
+      task.callback( function( error ){
+        done();
+
+        assert.equal( typeof error !== 'undefined', true, 'did not receive error' );
+        assert.equal( error.message == error_message, true, 'did not receive expected error message' );
       });
 
       task.start();

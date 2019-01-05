@@ -55,22 +55,24 @@ function create_task( callback ){
   function create_task_step( name, step ){
     if( ! name ) throw new Error( 'TASKS CAN\'T HAVE UNNAMED STEPS' );
     if( typeof name !== 'string' ) throw new Error( 'STEP NAMES MUST BE STRINGS' );
-    if( ! step || typeof step !== 'function' ) throw new Error( 'TASK STEPS ARE FUNCTIONS' );
+    if( ! step || typeof step !== 'function' ) throw new Error( 'TASK STEPS MUST BE FUNCTIONS' );
 
     if( ! started ) step_order.push({ name: name, step: step });
     else {
       step_order.splice( current_step + 1 + insertions, 0, { name: name, step: step });
       insertions += 1;
     }
+
+    hook.run( 'step-created', name );
   }
 
   function start_task(){
     if( started ) throw new Error( 'TASK HAS ALREADY STARTED' );
     if( step_order.length < 1 ) throw new Error( 'TASK HAS NO STEPS TO RUN' );
 
-    hook.run( 'task-start', { start_time: Date.now() });
-
     started = true;
+    hook.run( 'task-start' );
+
     run_step();
   }
 
@@ -80,11 +82,13 @@ function create_task( callback ){
     steps_run += 1;
 
     // remove completed step
-      step_order.shift();
+      var completed_step = step_order.shift();
       steps_deleted += 1;
 
     // reset step insertion tracker
       insertions = 0;
+
+    hook.run( 'step-end', completed_step.name );
 
     // end task if no more steps remain
       var should_end_task = step_order.length === 0;
@@ -97,6 +101,8 @@ function create_task( callback ){
   function run_step(){
 
     _yield( function(){
+      hook.run( 'step-start' );
+
       try {
         step_order[ current_step ].step();
       }
@@ -109,7 +115,9 @@ function create_task( callback ){
   function end_task(){
     if( ! started ) throw new Error( 'CAN\'T CALL NEXT STEP BEFORE TASK STARTS' );
 
+    hook.run( 'task-end' );
     callback.apply( callback, arguments );
+
     store = log = api = null;
   }
 
@@ -118,6 +126,8 @@ function create_task( callback ){
     if( typeof key !== 'string' ) throw new Error( 'KEY MUST BE A STRING' );
 
     delete store[ key ];
+
+    hook.run( 'value-updated', { key: key, value: null });
   }
 
   function set_task_variable( key, value ){
@@ -126,6 +136,8 @@ function create_task( callback ){
     if( typeof value === 'undefined' ) throw new Error( 'NEED A VALUE TO STORE' );
 
     store[ key ] = value;
+
+    hook.run( 'value-updated', { key: key, value: value });
   }
 
   function get_task_variable( key ){
