@@ -1,984 +1,860 @@
-var assert = require('assert');
-var cjs_task = require('../cjs-task.js');
-var expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log', 'stats'];
+var assert = require('assert'),
+    cjs_task = require('../cjs-task.js'),
+    expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log', 'stats', 'hook'];
 
 describe('require("cjs-task")', function(){
-	
-	it('is a function', function(){
 
-		assert.equal(typeof cjs_task === 'function', true, 'is not a function');
-	});
+  it('is a function', function(){
+    assert.equal(typeof cjs_task === 'function', true, 'is not a function');
+  });
 
-	it('returns an object when executed', function(){
+  it('returns an object when executed', function(){
+    assert.equal(Object.prototype.toString.call( cjs_task() ) === '[object Object]', true, 'did not return an object');
+  });
 
-		assert.equal(Object.prototype.toString.call( cjs_task() ) === '[object Object]', true, 'did not return an object');
-	});
+  it('execution returns object that matches task instance api', function(){
+    var returned_object = cjs_task();
 
-	it('execution returns object that matches task instance api', function(){
+    for(var i = expected_api.length - 1; i >= 0; i--) {
+      var api_name = expected_api[i];
+      assert.equal(typeof returned_object[ api_name ] !== 'undefined', true, 'returned object is missing "' + api_name + '" property')
+    };
+  });
 
-		var returned_object = cjs_task();
+  it('execution returns object with no unexpected properties', function(){
+    var returned_object = cjs_task();
 
-		for(var i = expected_api.length - 1; i >= 0; i--) {
-			
-			var api_name = expected_api[i];
+    for(var property in returned_object){
+      assert.equal( expected_api.indexOf( property ) > -1, true, 'found unexpected property: "' + property + '"');
+    }
+  });
 
-			assert.equal(typeof returned_object[ api_name ] !== 'undefined', true, 'returned object is missing "' + api_name + '" property')
-		};
-	});
+  it('if arguments are given, throws error if first argument is not a function', function(){
+    var error_thrown = false;
 
-	it('execution returns object with no unexpected properties', function(){
+    try {
+      var task = cjs_task( [] );
+    }
 
-		var returned_object = cjs_task();
+    catch( e ){
+      if( e instanceof Error ) error_thrown = true;
+    }
 
-		for(var property in returned_object){
-
-			assert.equal( expected_api.indexOf( property ) > -1, true, 'found unexpected property: "' + property + '"'); 
-		}
-	});
-
-	it('if arguments are given, throws error if first argument is not a function', function(){
-
-		var error_thrown = false;
-
-		try {
-
-			var task = cjs_task( [] );
-		}
-
-		catch( e ){
-
-			if( e instanceof Error ) error_thrown = true;
-		}
-
-		assert.equal( error_thrown === true, true, 'did not throw an error ')
-	});
+    assert.equal( error_thrown === true, true, 'did not throw an error ')
+  });
 });
 
 describe('Task Instance API', function(){
+  var task = cjs_task();
 
+  describe('task.callback', function(){
 
-	var task = cjs_task();
+    it('is a function', function(){
+      assert.equal(typeof task.callback === 'function', true, 'task.callback is not a function');
+    });
 
-	describe('task.callback', function(){
+    it('requires a function as first argument', function(){
+      var requires_function = false;
 
-		it('is a function', function(){
+      try{
+        task.callback([]);
+      }
 
-			assert.equal(typeof task.callback === 'function', true, 'task.callback is not a function');
-		});
-		it('requires a function as first argument', function(){
+      catch(err){
+        requires_function = true;
+      }
 
-			var requires_function = false;
+      assert.equal(requires_function, true, 'first argument does not need to be a function');
+    });
+  });
 
-			try{
+  describe('task.step', function(){
 
-				task.callback([]);
-			}
+    it('is a function', function(){
+      assert.equal(typeof task.step === 'function', true, 'task.step is not a function');
+    });
 
-			catch(err){
+    it('requires arguments', function(){
+      var no_arguments_required = true;
 
-				requires_function = true;
-			}
-		
-			assert.equal(requires_function, true, 'first argument does not need to be a function');
-		});
-	});
+      try{
+        task.step();
+      }
 
-	describe('task.step', function(){
+      catch(err){
+        no_arguments_required = false;
+      }
 
-		it('is a function', function(){
+      assert.equal(no_arguments_required, false, 'arguments are not required for execution');
+    });
 
-			assert.equal(typeof task.step === 'function', true, 'task.step is not a function');
-		});
+    it('requires a string as first argument', function(){
+      var requires_string = false;
 
-		it('requires arguments', function(){
+      try{
+        task.step({}, function(){});
+      }
 
-			var no_arguments_required = true;
-			
-			try{
+      catch(err){
+        requires_string = true;
+      }
 
-				task.step();
-			}
+      assert.equal(requires_string, true, 'first argument does not need to be a string');
+    });
 
-			catch(err){
+    it('requires a function as second argument', function(){
+      var requires_function = false;
 
-				no_arguments_required = false;
-			}
-			
-			assert.equal(no_arguments_required, false, 'arguments are not required for execution');
-		});
+      try{
+        task.step('hi', {});
+      }
 
-		it('requires a string as first argument', function(){
+      catch(err){
+        requires_function = true;
+      }
 
-			var requires_string = false;
+      assert.equal(requires_function, true, 'second argument does not need to be a function');
+    });
+  });
 
-			try{
+  describe('task.next', function(){
 
-				task.step({}, function(){});
-			}
+    it('is a function', function(){
+      assert.equal(typeof task.next === 'function', true, 'task.next is not a function');
+    });
+  });
 
-			catch(err){
+  describe('task.start', function(){
 
-				requires_string = true;
-			}
-		
-			assert.equal(requires_string, true, 'first argument does not need to be a string');
-		});
+    it('is a function', function(){
+      assert.equal(typeof task.start === 'function', true, 'task.start is not a function');
+    });
+  });
 
-		it('requires a function as second argument', function(){
+  describe('task.end', function(){
 
-			var requires_function = false;
+    it('is a function', function(){
+      assert.equal(typeof task.end === 'function', true, 'task.end is not a function');
+    });
+  });
 
-			try{
+  describe('task.get', function(){
 
-				task.step('hi', {});
-			}
+    it('is a function', function(){
+      assert.equal(typeof task.get === 'function', true, 'task.get is not a function');
+    });
 
-			catch(err){
+    it('requires arguments', function(){
 
-				requires_function = true;
-			}
+      var requires_arguments = false
 
-			assert.equal(requires_function, true, 'second argument does not need to be a function');
-		});
-	});
+      try{
+        task.get();
+      }
 
-	describe('task.next', function(){
+      catch(err){
+        requires_arguments = true;
+      }
 
-		it('is a function', function(){
+      assert.equal(requires_arguments, true, 'does not require arguments to execute');
+    })
 
-			assert.equal(typeof task.next === 'function', true, 'task.next is not a function');
-		});
-	});
+    it('requires a string as first argument', function(){
+      var requires_string = false;
 
-	describe('task.start', function(){
+      try{
+        task.get([]);
+      }
 
-		it('is a function', function(){
+      catch(err){
+        requires_string = true;
+      }
 
-			assert.equal(typeof task.start === 'function', true, 'task.start is not a function');
-		});
-	});
+      assert.equal(requires_string, true, 'does not require a string argument to execute');
+    });
+  });
 
-	describe('task.end', function(){
+  describe('task.set', function(){
 
-		it('is a function', function(){
+    it('is a function', function(){
+      assert.equal(typeof task.set === 'function', true, 'task.set is not a function');
+    });
 
-			assert.equal(typeof task.end === 'function', true, 'task.end is not a function');
-		});
-	});
+    it('requires arguments', function(){
+      var no_arguments_required = true;
 
-	describe('task.get', function(){
+      try{
+        task.set();
+      }
 
-		it('is a function', function(){
+      catch(err){
+        no_arguments_required = false;
+      }
 
-			assert.equal(typeof task.get === 'function', true, 'task.get is not a function');
-		});
+      assert.equal(no_arguments_required, false, 'arguments are not required for execution');
+    });
 
-		it('requires arguments', function(){
+    it('requires string as first argument', function(){
+      var requires_string = false;
 
-			var requires_arguments = false
+      try{
+        task.set({}, function(){});
+      }
 
-			try{ 
+      catch(err){
+        requires_string = true;
+      }
 
-				task.get();
-			}
+      assert.equal(requires_string, true, 'first argument does not need to be a string');
+    });
 
-			catch(err){
+    it('requires a second argument', function(){
 
-				requires_arguments = true;
-			}
-			
-			assert.equal(requires_arguments, true, 'does not require arguments to execute');
-		})
+      var requires_second_argument = false;
 
-		it('requires a string as first argument', function(){
+      try{
+        task.set('hi');
+      }
 
-			var requires_string = false;
+      catch(err){
+        requires_second_argument = true;
+      }
 
-			try{
+      assert.equal(requires_second_argument, true, 'does not require a second argument for execution');
+    });
+  });
 
-				task.get([]);
-			}
+  describe('task.unset', function(){
 
-			catch(err){
+    it('is a function', function(){
+      assert.equal(typeof task.unset === 'function', true, 'task.unset is not a function');
+    });
 
-				requires_string = true;
-			}
+    it('requires string as first argument', function(){
+      var requires_string = false;
 
-			assert.equal(requires_string, true, 'does not require a string argument to execute');
-		});
-	});
+      try {
+        task.unset({});
+      }
 
-	describe('task.set', function(){
+      catch(error){
+        requires_string = true;
+      }
 
-		it('is a function', function(){
+      assert.equal(requires_string, true, 'first argument does not need to be a string');
+    });
+  });
 
-			assert.equal(typeof task.set === 'function', true, 'task.set is not a function');
-		});
+  describe('task.log', function(){
 
-		it('requires arguments', function(){
+    it('is a function', function(){
+      assert.equal(typeof task.log === 'function', true, 'task.log is not a function');
+    });
+  });
 
-			var no_arguments_required = true;
-			
-			try{
+  describe('task.stats', function(){
+    var expected_properties = [ 'steps_run', 'steps_deleted' ];
 
-				task.set();
-			}
+    it('is an object', function(){
+      assert.equal(Object.prototype.toString.call( task.stats ) === '[object Object]', true, 'task.stats is not an object');
+    });
 
-			catch(err){
+    it('all properties are functions', function(){
+      var non_function_props_found = [];
 
-				no_arguments_required = false;
-			}
-		
-			assert.equal(no_arguments_required, false, 'arguments are not required for execution');
-		});
+      for( var key in task.stats ){
+        if( ! task.stats.hasOwnProperty( key ) ) continue;
+        if( typeof task.stats[ key ] !== 'function' ) non_function_props_found.push( key );
+      }
 
-		it('requires string as first argument', function(){
+      assert.equal( non_function_props_found.length === 0, true, 'non-function stats props found: ' + non_function_props_found.join( ', ' ) );
+    });
 
-			var requires_string = false;
+    it('has no unexpected properties', function(){
+      for(var i = expected_properties.length - 1; i >= 0; i--) {
+        var api_name = expected_properties[i];
+        assert.equal(typeof task.stats[ api_name ] !== 'undefined', true, 'task.stats is missing "' + api_name + '" property')
+      };
+    });
 
-			try{
+    it('has every expected property', function(){
+      var found_expected_properties = 0;
 
-				task.set({}, function(){});
-			}
+      expected_properties.forEach( function( key ){
+        if( expected_properties.indexOf( key ) > -1 ) found_expected_properties += 1;
+      });
 
-			catch(err){
-
-				requires_string = true;
-			}
-
-			assert.equal(requires_string, true, 'first argument does not need to be a string');
-		});
-
-		it('requires a second argument', function(){
-
-			var requires_second_argument = false;
-
-			try{
-
-				task.set('hi');
-			}
-
-			catch(err){
-
-				requires_second_argument = true;
-			}
-
-			assert.equal(requires_second_argument, true, 'does not require a second argument for execution');
-		});
-	});
-
-	describe('task.unset', function(){
-
-		it('is a function', function(){
-
-			assert.equal(typeof task.unset === 'function', true, 'task.unset is not a function');
-		});
-
-		it('requires string as first argument', function(){
-
-			var requires_string = false;
-
-			try{
-
-				task.unset({});
-			}
-
-			catch(error){
-
-				requires_string = true;
-			}
-
-			assert.equal(requires_string, true, 'first argument does not need to be a string');
-		});
-	});
-
-	describe('task.log', function(){
-
-		it('is a function', function(){
-
-			assert.equal(typeof task.log === 'function', true, 'task.log is not a function');
-		});
-	});
-
-	describe('task.stats', function(){
-		var expected_properties = [ 'steps_run', 'steps_deleted' ];
-
-		it('is an object', function(){
-			assert.equal(Object.prototype.toString.call( task.stats ) === '[object Object]', true, 'task.stats is not an object');
-		});
-
-		it('all properties are functions', function(){
-			var non_function_props_found = [];
-
-			for( var key in task.stats ){
-				if( ! task.stats.hasOwnProperty( key ) ) continue;
-				if( typeof task.stats[ key ] !== 'function' ) non_function_props_found.push( key );
-			}
-
-			assert.equal( non_function_props_found.length === 0, true, 'non-function stats props found: ' + non_function_props_found.join( ', ' ) );
-		});
-
-		it('has no unexpected properties', function(){
-			for(var i = expected_properties.length - 1; i >= 0; i--) {
-
-				var api_name = expected_properties[i];
-				assert.equal(typeof task.stats[ api_name ] !== 'undefined', true, 'task.stats is missing "' + api_name + '" property')
-			};
-		});
-
-		it('has every expected property', function(){
-			var found_expected_properties = 0;
-
-			expected_properties.forEach( function( key ){
-				if( expected_properties.indexOf( key ) > -1 ) found_expected_properties += 1;
-			});
-
-			assert.equal( found_expected_properties == expected_properties.length, true, 'number of properties found does not match expectations' );
-		});
-	});
+      assert.equal( found_expected_properties == expected_properties.length, true, 'number of properties found does not match expectations' );
+    });
+  });
 });
 
 describe('Task Instance Behavior', function(){
 
-	describe('task.start', function(){
+  describe('task.start', function(){
 
-		it('executes the first step', function(done){
+    it('executes the first step', function(done){
+      var started = false,
+          task = cjs_task();
 
-			var started = false;
-			var task = cjs_task();
+      task.step('step 1', function(){
+        started = true;
+      });
 
-			task.step('step 1', function(){
+      task.start();
 
-				started = true;
-			});
+      setTimeout(function(){
+        done();
+        assert.equal( started === true, true, 'first step did not execute' );
+      }, 50);
+    });
 
-			task.start();
+    it('throws an error if called multiple times', function(done){
+      var task = cjs_task(),
+          error_thrown = false;
 
-			setTimeout(function(){
+      task.step('test multiple starts', function(){
+        try{
+          task.start();
+        }
 
-				done();
+        catch(error){
+          error_thrown = true;
+        }
 
-				assert.equal(started === true, true, 'first step did not execute');
+        done();
+        assert.equal( error_thrown === true, true, 'error was not thrown when start was called multiple times' );
+      });
 
-			}, 50);
-		});
+      task.start();
+    });
 
-		it('throws an error if called multiple times', function(done){
+    it('throws an error if there are no steps to run', function(){
+      var task = cjs_task(),
+          error_thrown = false;
 
-			var task = cjs_task(),
-					error_thrown = false;
+      try{
+        task.start();
+      }
 
-			task.step('test multiple starts', function(){
+      catch(e){
+        error_thrown = true;
+      }
 
-				try{
+      assert.equal( error_thrown, true, 'error not thrown' );
+    });
+  });
 
-					task.start();
-				}
+  describe('task.step', function(){
 
-				catch(error){
+    it('function executes when task.start() is called', function(done){
+      var task = cjs_task(),
+          step_added = false;
 
-					error_thrown = true;
-				}
+      task.step('testing add a step', function(){
+        step_added = true;
+        done();
+        assert.equal(step_added === true, true, 'step was not added');
+      });
 
-				done();
-				
-				assert.equal(error_thrown === true, true, 'error was not thrown when start was called multiple times');
-			});
+      task.start();
+    });
 
-			task.start();
-		});
+    it('extra steps do not execute without task.next()', function(done){
+      var task = cjs_task(),
+          steps_executed = { 1: false, 2: false };
 
-		it('throws an error if there are no steps to run', function(){
+      task.step('step 1', function(){
+        steps_executed[1] = true;
+      });
 
-			var task = cjs_task(),
-					error_thrown = false;
+      task.step('step 2', function(){
+        steps_executed[2] = true;
+      });
 
-			try{
-				task.start();
-			}
+      task.start();
 
-			catch(e){
-				error_thrown = true;
-			}
+      setTimeout(function(){
+        done();
 
-			assert.equal(error_thrown, true, 'error not thrown');
-		});
-	});
+        assert.equal(steps_executed[1] === true, true, 'step 1 was not executed');
+        assert.equal(steps_executed[2] === false, true, 'step 2 was executed without task.next()');
+      }, 50);
+    });
 
-	describe('task.step', function(){
+    it('will insert steps after current step if used AFTER task has started', function(done){
+      var task = cjs_task(),
+          expect = [ 1, '1a', '1b', 2, '2a', '2aa', '2ab', '2b' ],
+          result = [];
 
-		it('function executes when task.start() is called', function(done){
+      task.step( '1', function(){
+        result.push(1);
 
-			var step_added = false;
-			var task = cjs_task();
+        task.step( '1a', function(){
+          result.push('1a');
+          task.next();
+        });
 
-			task.step('testing add a step', function(){
+        task.step( '1b', function(){
+          result.push('1b');
+          task.next();
+        });
 
-				step_added = true;
+        task.next();
+      });
 
-				done();
+      task.step( '2', function(){
+        result.push(2);
 
-				assert.equal(step_added === true, true, 'step was not added');
-			});
+        task.step( '2a', function(){
+          result.push('2a');
 
-			task.start();
-		});
+            task.step( '2aa', function(){
 
-		it('extra steps do not execute without task.next()', function(done){
+              result.push('2aa');
+              task.next();
+            });
 
-			var steps_executed = {1: false, 2: false};
-			var task = cjs_task();
+            task.step( '2ab', function(){
 
-			task.step('step 1', function(){
+              result.push('2ab');
+              task.next();
+            });
 
-				steps_executed[1] = true;
-			});
+          task.next();
+        });
 
-			task.step('step 2', function(){
+        task.step( '2b', function(){
 
-				steps_executed[2] = true;
-			});
+          result.push('2b');
+          task.next();
+        });
 
-			task.start();
+        task.next();
+      });
 
-			setTimeout(function(){
+      task.callback( function(){
+        var matching = true;
 
-				done();
+        expect.forEach( function( entry, i ){
+          if( entry != result[ i ] ) matching = false;
+        });
 
-				assert.equal(steps_executed[1] === true, true, 'step 1 was not executed');
-				assert.equal(steps_executed[2] === false, true, 'step 2 was executed without task.next()');
-			}, 50);
-		});
+        assert.equal( matching, true, 'result does not match expected pattern' );
+        done();
+      });
 
-		it('will insert steps after current step if used AFTER task has started', function(done){
+      task.start();
+    });
+  });
 
-			var task = cjs_task(),
-					expect = [ 1, '1a', '1b', 2, '2a', '2aa', '2ab', '2b' ],
-					result = [];
+  describe('task.next', function(){
 
-			task.step( '1', function(){
+    it('executes next step after task has started', function(done){
 
-				result.push(1);
+      var progressed_to_next_step = false;
+      var task = cjs_task();
 
-				task.step( '1a', function(){
-					result.push('1a');
-					task.next();
-				});
+      task.step('step 1', task.next);
 
-				task.step( '1b', function(){
-					result.push('1b');
-					task.next();
-				});
+      task.step('step 2', function(){
 
-				task.next();
-			});
+        progressed_to_next_step = true;
 
-			task.step( '2', function(){
-				result.push(2);
+        done();
 
-				task.step( '2a', function(){
-					result.push('2a');
+        assert.equal(progressed_to_next_step === true, true, 'did not progress to the next step');
+      });
 
-						task.step( '2aa', function(){
+      task.start();
+    });
 
-							result.push('2aa');
-							task.next();
-						});
+    it('executes steps sequentially', function(done){
+      var task = cjs_task(),
+          expected = ['test', 'is', 'running'],
+          outcome = [];
 
-						task.step( '2ab', function(){
+      task.step('step 1', function(){
+        outcome.push( expected[0] );
+        task.next();
+      });
 
-							result.push('2ab');
-							task.next();
-						});
+      task.step('step 2', function(){
+        outcome.push( expected[1] );
+        task.next();
+      });
 
-					task.next();
-				});
+      task.step('step 3', function(){
+        outcome.push( expected[2] );
+      });
 
-				task.step( '2b', function(){
+      task.start();
 
-					result.push('2b');
-					task.next();
-				});
+      setTimeout( function(){
+        done();
+        assert.equal( expected[0] === outcome[0] && expected[1] === outcome[1] && expected[2] === outcome[2], true, 'steps were not executed sequentially' );
+      }, 50);
+    });
 
-				task.next();
-			});
+    it('executes task callback if there are no more steps', function(done){
+      var task = cjs_task(),
+          triggered_callback = false;
 
-			task.callback( function(){
+      task.callback( function(){
+        triggered_callback = true;
+        done();
+        assert.equal(triggered_callback === true, true, 'did not trigger callback after last step');
+      });
 
-				var matching = true;
+      task.step('step 1', task.next);
+      task.step('step 2', task.next);
 
-				expect.forEach( function( entry, i ){
-					if( entry != result[ i ] ) matching = false;
-				});
+      task.start();
+    });
 
-				assert.equal( matching, true, 'result does not match expected pattern' );
-				done();
-			});
+    it('will throw an error if called before task starts', function(){
+      var task = cjs_task(),
+          threw_error = false;
 
-			task.start();
-		});
-	});
+      task.step('step 1', task.next);
 
-	describe('task.next', function(){
+      try{
+        task.next();
+      }
 
-		it('executes next step after task has started', function(done){
+      catch(e){
+        threw_error = true;
+      }
 
-			var progressed_to_next_step = false;
-			var task = cjs_task();
+      assert.equal(threw_error, true, 'did not throw error');
+    });
+  });
 
-			task.step('step 1', task.next);
+  describe('task.end', function(){
 
-			task.step('step 2', function(){
+    it('triggers instance callback', function(done){
+      var task = cjs_task(),
+          callback_triggered = false;
 
-				progressed_to_next_step = true;
+      task.callback( function(){
+        callback_triggered = true;
+        done();
+        assert.equal(callback_triggered === true, true, 'callback was not triggered');
+      });
 
-				done();
+      task.step('step 1', function(){
+        task.end();
+      });
 
-				assert.equal(progressed_to_next_step === true, true, 'did not progress to the next step');
-			});
+      task.start();
+    });
 
-			task.start();
-		});
+    it('will throw an error if called before task starts', function(){
+      var task = cjs_task(),
+          threw_error = false;
 
-		it('executes steps sequentially', function(done){
+      task.step('step 1', task.next);
 
-			var expected = ['test', 'is', 'running'];
-			var outcome = [];
-			var task = cjs_task();
+      try{
+        task.end();
+      }
 
-			task.step('step 1', function(){
+      catch(e){
+        threw_error = true;
+      }
 
-				outcome.push( expected[0] );
-				task.next();
-			});
+      assert.equal(threw_error, true, 'did not throw error');
+    });
+  });
 
-			task.step('step 2', function(){
+  describe('task.callback', function(){
 
-				outcome.push( expected[1] );
-				task.next();
-			});
+    it('overwrites previous task callback', function(){
+      var task = cjs_task(),
+          default_callback = false,
+          modified_callback = false;
 
-			task.step('step 3', function(){
+      task.callback( function(){
+        default_callback = true;
+        do_assertions();
+      });
 
-				outcome.push( expected[2] );
-			});
+      task.step('step 1', task.next);
 
-			task.start();
+      task.callback(function(){
+        modified_callback = true;
+        do_assertions();
+      });
 
-			setTimeout(function(){
+      task.start();
 
-				done();
+      function do_assertions(){
+        assert(default_callback === false, true, 'default callback was triggered');
+        assert(modified_callback === true, true, 'modified callback was not triggered');
+      }
+    });
+  });
 
-				assert.equal(expected[0] === outcome[0] && expected[1] === outcome[1] && expected[2] === outcome[2], true, 'steps were not executed sequentially');
-			}, 50);
-		});
+  describe('task.set', function(){
 
-		it('executes task callback if there are no more steps', function(done){
+    it('throws an error if no key is given', function(){
+      var task = cjs_task(),
+          value = 'test',
+          error_thrown = false;
 
-			var triggered_callback = false;
-			var task = cjs_task( function(){
+      try{
+        task.set( null, value );
+      }
 
-				triggered_callback = true;
+      catch(error){
+        error_thrown = true;
+      }
 
-				done();
+      assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
+    });
 
-				assert.equal(triggered_callback === true, true, 'did not trigger callback after last step');
-			});
+    it('throws an error if key is not a string', function(){
+      var task = cjs_task(),
+          value = 'test',
+          error_thrown = false;
 
-			task.step('step 1', task.next);
-			task.step('step 2', task.next);
+      try{
+        task.set( [], value );
+      }
 
-			task.start();
-		});
+      catch(error){
+        error_thrown = true;
+      }
 
-		it('will throw an error if called before task starts', function(){
+      assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
+    });
 
-			var task = cjs_task(),
-					threw_error = false;
+    it('throws an error if called with no value to store', function(){
+      var task = cjs_task(),
+          key = 'test',
+          error_thrown = false;
 
-			task.step('step 1', task.next);
+      try{
+        task.set( key );
+      }
 
-			try{
-				task.next();
-			}
+      catch(error){
+        error_thrown = true;
+      }
 
-			catch(e){
-				threw_error = true;
-			}
+      assert.equal(error_thrown === true, true, 'no error thrown when given no value to store');
+    });
+  });
 
-			assert.equal(threw_error, true, 'did not throw error');
-		});
-	});
+  describe('task.get', function(){
 
-	describe('task.end', function(){
+    it('retrieves value assigned to a key by task.set', function(){
+      var task = cjs_task(),
+          set_value = 'hello world',
+          get_value,
+          key = 'testing';
 
-		it('triggers instance callback', function(done){
+      task.set( key , set_value);
+      get_value = task.get( key );
+      assert.equal(set_value === get_value, true, 'retrieved value does not match set value');
+    });
 
-			var callback_triggered = false;
+    it('returns null if key has no stored value', function(){
+      var task = cjs_task();
+      assert.equal( task.get( 'test' ), null, 'did not return null');
+    });
 
-			var task = cjs_task(function(){
+    it('throws an error if no key is given', function(){
+      var task = cjs_task(),
+          error_thrown = false;
 
-				callback_triggered = true;
+      task.set('key', 'value');
 
-				done();
+      try{
+        task.get();
+      }
 
-				assert.equal(callback_triggered === true, true, 'callback was not triggered');
-			});
+      catch(error){
+        error_thrown = true;
+      }
 
-			task.step('step 1', function(){
+      assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
+    });
 
-				task.end();
-			});
+    it('throws an error if key is not a string', function(){
+      var task = cjs_task(),
+          key = 'test',
+          error_thrown = false;
 
-			task.start();
-		});
+      task.set( key, 'hello' );
 
-		it('will throw an error if called before task starts', function(){
+      try{
+        task.get( [] );
+      }
 
-			var task = cjs_task(),
-					threw_error = false;
+      catch(error){
+        error_thrown = true;
+      }
 
-			task.step('step 1', task.next);
+      assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
+    });
+  });
 
-			try{
-				task.end();
-			}
+  describe('task.unset', function(){
 
-			catch(e){
-				threw_error = true;
-			}
+    it('deletes value assigned to a key by task.set', function(){
+      var task = cjs_task(),
+          set_value = 'hello world',
+          get_value,
+          key = 'testing';
 
-			assert.equal(threw_error, true, 'did not throw error');
-		});
-	});
+      task.set( key , set_value);
+      task.unset( key );
+      get_value = task.get( key );
 
-	describe('task.callback', function(){
-	
-		it('overwrites previous task callback', function(){
+      assert.equal(get_value === null, true, 'set value was not deleted');
+    });
 
-			var default_callback = false;
-			var modified_callback = false;
+    it('throws an error if no key is given', function(){
+      var task = cjs_task(),
+          error_thrown = false;
 
-			var task = cjs_task(function(){
-				default_callback = true;
-				do_assertions();
-			});
+      task.set('key', 'value');
 
-			task.step('step 1', task.next);
+      try{
+        task.unset();
+      }
 
-			task.callback(function(){
-				modified_callback = true;
-				do_assertions();
-			});
+      catch(error){
+        error_thrown = true;
+      }
 
-			task.start();
+      assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
+    });
 
-			function do_assertions(){
-				assert(default_callback === false, true, 'default callback was triggered');
-				assert(modified_callback === true, true, 'modified callback was not triggered');
-			}
-		});
-	});
+    it('throws an error if key is not a string', function(){
+      var task = cjs_task(),
+          key = 'test',
+          error_thrown = false;
 
-	describe('task.set', function(){
+      task.set( key, 'hello' );
 
-		it('throws an error if no key is given', function(){
+      try{
+        task.unset( [] );
+      }
 
-			var task = cjs_task(),
-					value = 'test',
-					error_thrown = false;
+      catch(error){
+        error_thrown = true;
+      }
 
-			try{
+      assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
+    });
+  });
 
-				task.set( null, value );
-			}
+  describe('task.log', function(){
 
-			catch(error){
+    it('returns array of stored arguments if no argument is given', function(){
+      var task = cjs_task(),
+          log_entries;
 
-				error_thrown = true;
-			}
+      log_entries = task.log();
 
-			assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
-		});
+      assert.equal( Object.prototype.toString.call( log_entries ) === '[object Array]', true, 'did not return an array' );
+      assert.equal( log_entries.length === 0, true, 'task log should be empty, but isn\'t' );
+    });
 
-		it('throws an error if key is not a string', function(){
+    it('stores first argument given', function(){
+      var task = cjs_task(),
+          entries_to_log = [1, [], {}, function(){}],
+          log_entries;
 
-			var task = cjs_task(),
-					value = 'test',
-					error_thrown = false;
+      entries_to_log.forEach( function( entry ){
+        task.log( entry );
+      });
 
-			try{
+      log_entries = task.log();
 
-				task.set( [], value );
-			}
+      log_entries.forEach( function( entry, index ){
+        assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
+      });
+    });
+  });
 
-			catch(error){
+  describe('task.stats', function(){
 
-				error_thrown = true;
-			}
+    it('returns array of stored arguments if no argument is given', function(){
+      var task = cjs_task(),
+          log_entries;
 
-			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
-		});
+      log_entries = task.log();
 
-		it('throws an error if called with no value to store', function(){
+      assert.equal( Object.prototype.toString.call( log_entries ) === '[object Array]', true, 'did not return an array' );
+      assert.equal( log_entries.length === 0, true, 'task log should be empty, but isn\'t' );
+    });
 
-			var task = cjs_task(),
-					key = 'test',
-					error_thrown = false;
+    it('stores first argument given', function(){
+      var task = cjs_task(),
+          entries_to_log = [1, [], {}, function(){}],
+          log_entries;
 
-			try{
+      entries_to_log.forEach( function( entry ){
+        task.log( entry );
+      });
 
-				task.set( key );
-			}
+      log_entries = task.log();
 
-			catch(error){
+      log_entries.forEach( function( entry, index ){
+        assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
+      });
+    });
+  });
 
-				error_thrown = true;
-			}
+  describe('task', function(){
 
-			assert.equal(error_thrown === true, true, 'no error thrown when given no value to store');
-		});
-	});
+    it('will run even if no callback is specified', function(done){
+      var task = cjs_task(),
+          ran = false;
 
-	describe('task.get', function(){
+      task.step('step 1', task.next);
+      task.step('step 2', task.next);
+      task.step('step 3', function(){
+        ran = true;
+      });
 
-		it('retrieves value assigned to a key by task.set', function(){
+      task.start();
 
-			var set_value = 'hello world';
-			var get_value;
-			var key = 'testing';
+      setTimeout( function(){
+        assert( ran, true, 'did not run task');
+        done()
+      }, 88 );
+    });
 
-			var task = cjs_task();
+    it('deletes steps after execution', function(done){
+      var task = cjs_task(),
+          timed_out = false;
 
-			task.set( key , set_value);
+      task.set( 'shortcircuit-timer', setTimeout(
+        function(){
+          clearTimeout( task.get( 'shortcircuit-timer' ) );
+          task.end( new Error( 'timed out' ) );
+        }, 1000
+      ) );
 
-			get_value = task.get( key );
+      task.step('step 1', task.next);
+      task.step('step 2', task.next);
+      task.step('step 3', task.next);
 
-			assert.equal(set_value === get_value, true, 'retrieved value does not match set value');
-		});
+      task.callback( function(){
+        assert.equal( timed_out === false, true, 'task timed out');
 
-		it('returns null if key has no stored value', function(){
+        var steps_run = task.stats.steps_run(),
+            steps_deleted = task.stats.steps_deleted();
 
-			var task = cjs_task();
+        assert.equal( steps_run === steps_deleted, true, 'total steps run ('+ steps_run +') does not match total steps deleted ('+ steps_deleted +')');
+        done();
+      });
 
-			assert.equal( task.get( 'test' ), null, 'did not return null');
-		});
-
-		it('throws an error if no key is given', function(){
-
-			var task = cjs_task(),
-					error_thrown = false;
-
-			task.set('key', 'value');
-
-			try{
-
-				task.get();
-			}
-
-			catch(error){
-
-				error_thrown = true;
-			}
-
-			assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
-		});
-
-		it('throws an error if key is not a string', function(){
-
-			var task = cjs_task(),
-					key = 'test',
-					error_thrown = false;
-
-			task.set( key, 'hello' );
-
-			try{
-
-				task.get( [] );
-			}
-
-			catch(error){
-
-				error_thrown = true;
-			}
-
-			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
-		});
-	});
-
-	describe('task.unset', function(){
-
-		it('deletes value assigned to a key by task.set', function(){
-
-			var set_value = 'hello world';
-			var get_value;
-			var key = 'testing';
-
-			var task = cjs_task();
-
-			task.set( key , set_value);
-
-			task.unset( key );
-
-			get_value = task.get( key );
-
-			assert.equal(get_value === null, true, 'set value was not deleted');
-		});
-
-		it('throws an error if no key is given', function(){
-
-			var task = cjs_task(),
-					error_thrown = false;
-
-			task.set('key', 'value');
-
-			try{
-
-				task.unset();
-			}
-
-			catch(error){
-
-				error_thrown = true;
-			}
-
-			assert.equal(error_thrown === true, true, 'no error thrown when no key is given');
-		});
-
-		it('throws an error if key is not a string', function(){
-
-			var task = cjs_task(),
-					key = 'test',
-					error_thrown = false;
-
-			task.set( key, 'hello' );
-
-			try{
-
-				task.unset( [] );
-			}
-
-			catch(error){
-
-				error_thrown = true;
-			}
-
-			assert.equal(error_thrown === true, true, 'no error thrown when key is not a string');
-		});
-	});
-
-	describe('task.log', function(){
-
-		it('returns array of stored arguments if no argument is given', function(){
-
-			var task = cjs_task(),
-					log_entries;
-
-			log_entries = task.log();
-
-			assert.equal( Object.prototype.toString.call( log_entries ) === '[object Array]', true, 'did not return an array' );
-			assert.equal( log_entries.length === 0, true, 'task log should be empty, but isn\'t' );
-		});
-
-		it('stores first argument given', function(){
-
-			var task = cjs_task(),
-					entries_to_log = [1, [], {}, function(){}],
-					log_entries;
-
-			entries_to_log.forEach( function( entry ){
-
-				task.log( entry );
-			});
-
-			log_entries = task.log();
-
-			log_entries.forEach( function( entry, index ){
-
-				assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
-			});
-		});
-	});
-
-	describe('task.stats', function(){
-
-		it('returns array of stored arguments if no argument is given', function(){
-
-			var task = cjs_task(),
-					log_entries;
-
-			log_entries = task.log();
-
-			assert.equal( Object.prototype.toString.call( log_entries ) === '[object Array]', true, 'did not return an array' );
-			assert.equal( log_entries.length === 0, true, 'task log should be empty, but isn\'t' );
-		});
-
-		it('stores first argument given', function(){
-
-			var task = cjs_task(),
-					entries_to_log = [1, [], {}, function(){}],
-					log_entries;
-
-			entries_to_log.forEach( function( entry ){
-
-				task.log( entry );
-			});
-
-			log_entries = task.log();
-
-			log_entries.forEach( function( entry, index ){
-
-				assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
-			});
-		});
-	});
-
-	describe('task', function(){
-		it('will run even if no callback is specified', function(done){
-
-			var task = cjs_task(),
-					ran = false;
-
-			task.step('step 1', task.next);
-			task.step('step 2', task.next);
-			task.step('step 3', function(){
-				ran = true;
-			});
-
-			task.start();
-
-			setTimeout( function(){
-				assert( ran, true, 'did not run task');
-				done()
-			}, 88 );
-		});
-
-		it('deletes steps after execution', function(done){
-			var task = cjs_task(),
-					timed_out = false;
-
-			task.set( 'shortcircuit-timer', setTimeout(
-				function(){
-					clearTimeout( task.get( 'shortcircuit-timer' ) );
-					task.end( new Error( 'timed out' ) );
-				}, 1000
-			) );
-
-			task.step('step 1', task.next);
-			task.step('step 2', task.next);
-			task.step('step 3', task.next);
-
-			task.callback( function(){
-				assert.equal( timed_out === false, true, 'task timed out');
-
-				var steps_run = task.stats.steps_run(),
-						steps_deleted = task.stats.steps_deleted();
-
-				assert.equal( steps_run === steps_deleted, true, 'total steps run ('+ steps_run +') does not match total steps deleted ('+ steps_deleted +')');
-				done();
-			});
-
-			task.start();
-		});
-	});
+      task.start();
+    });
+  });
 });
