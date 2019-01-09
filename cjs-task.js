@@ -127,15 +127,15 @@ function create_task( callback ){
     if( typeof name !== 'string' ) throw new Error( 'SUBTASK NAMES MUST BE STRINGS' );
     if( ! handler || typeof handler !== 'function' ) throw new Error( 'SUBTASK HANDLERS MUST BE FUNCTIONS' );
 
-    var subtask = create_task();
-
-    // copy state from task to subtask
-      for( var key in state ){
-        if( ! state.hasOwnProperty( key ) ) continue;
-        else subtask.set( key, state[ key ] );
-      }
-
     task.step( name, function(){
+      var subtask = create_task();
+
+      // copy state from task to subtask
+        for( var key in state ){
+          if( ! state.hasOwnProperty( key ) ) continue;
+          else subtask.set( key, state[ key ] );
+        }
+
       handler( subtask );
     });
   }
