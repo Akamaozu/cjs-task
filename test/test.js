@@ -1,6 +1,6 @@
 var assert = require('assert'),
     cjs_task = require('../cjs-task.js'),
-    expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log', 'stats', 'hook'];
+    expected_api = ['callback', 'step', 'start', 'next', 'end', 'unset', 'set', 'get', 'log', 'stats', 'hook', 'subtask' ];
 
 describe('require("cjs-task")', function(){
 
@@ -321,6 +321,54 @@ describe('Task Instance API', function(){
       });
 
       assert.equal( found_expected_properties == expected_properties.length, true, 'number of properties found does not match expectations' );
+    });
+  });
+
+  describe('task.subtask', function(){
+    it('is an function', function(){
+      assert.equal( typeof task.subtask === 'function', true, 'task.subtask is not a function');
+    });
+
+    it('requires arguments', function(){
+      var no_arguments_required = true;
+
+      try{
+        task.subtask();
+      }
+
+      catch(err){
+        no_arguments_required = false;
+      }
+
+      assert.equal(no_arguments_required, false, 'arguments are not required for execution');
+    });
+
+    it('requires a string as first argument', function(){
+      var requires_string = false;
+
+      try{
+        task.subtask({}, function(){});
+      }
+
+      catch(err){
+        requires_string = true;
+      }
+
+      assert.equal(requires_string, true, 'first argument does not need to be a string');
+    });
+
+    it('requires a function as second argument', function(){
+      var requires_function = false;
+
+      try{
+        task.subtask('hi', {});
+      }
+
+      catch(err){
+        requires_function = true;
+      }
+
+      assert.equal(requires_function, true, 'second argument does not need to be a function');
     });
   });
 });
@@ -970,6 +1018,53 @@ describe('Task Instance Behavior', function(){
       log_entries.forEach( function( entry, index ){
         assert.equal( entry === entries_to_log[ index ], true, 'entry at index ' + index + ' does not match input');
       });
+    });
+  });
+
+  describe('task.subtask', function(){
+
+    it('creates a step with given name', function(){
+      var task = cjs_task(),
+          subtask_name = 'test subtask';
+
+      task.hook.add( 'step-created', 'do assertions', function( step_name ){
+        assert.equal( step_name === subtask_name, true, 'step created does not match subtask name' );
+      });
+
+      task.subtask( subtask_name, function(){});
+    });
+
+    it('has a copy of task variables the main task has', function( done ){
+      var task = cjs_task(),
+          task_var_key = 'sample key';
+
+      task.step( 'set variable', function(){
+        task.set( task_var_key, 'sample key value' );
+        task.next();
+      });
+
+      task.subtask( 'do assertions', function( subtask ){
+        done();
+
+        assert.equal( task.get( task_var_key ) === subtask.get( task_var_key ), true, 'subtask variable does not match task variable' );
+      });
+
+      task.start();
+    });
+
+    it('duplicates changes to subtask store in main task store', function( done ){
+      var task = cjs_task();
+
+      task.subtask( 'do assertions', function( subtask ){
+        var subtask_var_key = 'beep';
+
+        subtask.set( subtask_var_key, 'boop' );
+
+        assert.equal( subtask.get( subtask_var_key ) === task.get( subtask_var_key ), true, 'task variable does not match subtask variable' );
+        done();
+      });
+
+      task.start();
     });
   });
 
