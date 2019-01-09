@@ -127,7 +127,7 @@ function create_task( callback ){
     if( typeof name !== 'string' ) throw new Error( 'SUBTASK NAMES MUST BE STRINGS' );
     if( ! handler || typeof handler !== 'function' ) throw new Error( 'SUBTASK HANDLERS MUST BE FUNCTIONS' );
 
-    task.step( name, function(){
+    create_task_step( name, function(){
       var subtask = create_task();
 
       // copy state from task to subtask
