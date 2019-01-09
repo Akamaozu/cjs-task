@@ -23,6 +23,7 @@ function create_task( callback ){
     api.step = create_task_step;
     api.next = start_next_task_step;
     api.end = end_task;
+    api.subtask = create_subtask;
 
   // configuration
     api.get = get_task_variable;
@@ -119,6 +120,24 @@ function create_task( callback ){
     callback.apply( callback, arguments );
 
     store = log = api = null;
+  }
+
+  function create_subtask( name, handler ){
+    if( ! name ) throw new Error( 'SUBTASKS CAN\'T BE UNNAMED' );
+    if( typeof name !== 'string' ) throw new Error( 'SUBTASK NAMES MUST BE STRINGS' );
+    if( ! handler || typeof handler !== 'function' ) throw new Error( 'SUBTASK HANDLERS MUST BE FUNCTIONS' );
+
+    var subtask = create_task();
+
+    // copy state from task to subtask
+      for( var key in state ){
+        if( ! state.hasOwnProperty( key ) ) continue;
+        else subtask.set( key, state[ key ] );
+      }
+
+    task.step( name, function(){
+      handler( subtask );
+    });
   }
 
   function delete_task_varable( key ){
