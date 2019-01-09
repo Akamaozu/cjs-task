@@ -130,10 +130,10 @@ function create_task( callback ){
     create_task_step( name, function(){
       var subtask = create_task();
 
-      // copy state from task to subtask
-        for( var key in state ){
-          if( ! state.hasOwnProperty( key ) ) continue;
-          else subtask.set( key, state[ key ] );
+      // copy store from task to subtask
+        for( var key in store ){
+          if( ! store.hasOwnProperty( key ) ) continue;
+          else subtask.set( key, store[ key ] );
         }
 
       handler( subtask );
