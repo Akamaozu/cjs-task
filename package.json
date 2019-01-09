@@ -1,6 +1,6 @@
 {
   "name": "cjs-task",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Control Flow Like a Pro",
   "main": "cjs-task.js",
   "scripts": {
