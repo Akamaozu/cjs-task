@@ -136,6 +136,11 @@ function create_task( callback ){
           else subtask.set( key, store[ key ] );
         }
 
+      // copy store changes in subtask to task
+        subtask.hook.add( 'value-updated', 'copy-changes-to-main-task', function( details ){
+          set_task_variable( details.key, details.value );
+        });
+
       handler( subtask );
     });
   }
