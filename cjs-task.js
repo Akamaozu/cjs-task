@@ -116,10 +116,15 @@ function create_task( callback ){
   function end_task(){
     if( ! started ) throw new Error( 'CAN\'T CALL NEXT STEP BEFORE TASK STARTS' );
 
-    hook.run( 'task-end' );
-    callback.apply( callback, arguments );
+    var end_task_args = arguments;
 
-    store = log = api = null;
+    _yield( function(){
+      hook.run( 'task-end' );
+
+      callback.apply( callback, end_task_args );
+
+      store = log = api = null;
+    });
   }
 
   function create_subtask( name, handler ){
