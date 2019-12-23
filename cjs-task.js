@@ -102,7 +102,7 @@ function create_task( callback ){
   function run_step(){
 
     _yield( function(){
-      hook.run( 'step-start' );
+      hook.run( 'step-start', step_order[ current_step ].name );
 
       try {
         step_order[ current_step ].step();
