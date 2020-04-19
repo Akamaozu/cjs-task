@@ -13,7 +13,8 @@ function create_task( callback ){
       insertions = 0,
       steps_run = 0,
       steps_deleted = 0,
-      started;
+      started,
+      ended;
 
   if( ! callback ) callback = default_task_callback;
   if( typeof callback !== 'function' ) throw new Error( 'TASK CALLBACK MUST BE A FUNCTION' );
@@ -115,11 +116,19 @@ function create_task( callback ){
 
   function end_task(){
     if( ! started ) throw new Error( 'CAN\'T CALL NEXT STEP BEFORE TASK STARTS' );
+    if( ended ) return;
 
-    hook.run( 'task-end' );
-    callback.apply( callback, arguments );
+    var end_task_args = arguments;
 
-    store = log = api = null;
+    _yield( function(){
+      hook.run( 'task-end' );
+
+      callback.apply( callback, end_task_args );
+
+      store = log = api = null;
+    });
+
+    ended = true;
   }
 
   function create_subtask( name, handler ){
